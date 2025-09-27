@@ -4,7 +4,7 @@ import os
 import lmdb
 import pickle
 
-root_dir = r'../Raw_data/SHU-MI'
+root_dir = r'../data/datasets/BigDownstream/MODMA/files'
 files = [file for file in os.listdir(root_dir)]
 files = sorted(files)
 print(len(files))
@@ -20,8 +20,7 @@ dataset = {
     'val': list(),
     'test': list(),
 }
-os.makedirs('../data/shu_datasets/processed', exist_ok=True)
-db = lmdb.open(r'../data/shu_datasets/processed', map_size=10 * 1024 * 1024 * 1024) #10GB   初始:110612736
+db = lmdb.open(r'../data/datasets/shu_datasets/processed', map_size=10 * 1024 * 1024 * 1024) #10GB   初始:110612736
 for files_key in files_dict.keys():
     for file in files_dict[files_key]:
         data = scipy.io.loadmat(os.path.join(root_dir, file))

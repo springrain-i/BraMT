@@ -8,31 +8,27 @@ import numpy as np
 import pandas as pd
 
 
-train_dir = '../Raw_data/BCIC2020/Training set'
-val_dir = '../Raw_data/BCIC2020/Validation set'
-test_dir = '../Raw_data/BCIC2020/Test set'
+train_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Training set'
+val_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Validation set'
+test_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Test set'
 
 
 
 files_dict = {
-    'train':sorted([file for file in os.listdir(train_dir) if os.path.isfile(os.path.join(train_dir, file))]),
-    'val':sorted([file for file in os.listdir(val_dir) if os.path.isfile(os.path.join(val_dir, file))]),
-    'test':sorted([file for file in os.listdir(test_dir) if os.path.isfile(os.path.join(test_dir, file))]),
+    'train':sorted([file for file in os.listdir(train_dir)]),
+    'val':sorted([file for file in os.listdir(val_dir)]),
+    'test':sorted([file for file in os.listdir(test_dir)]),
 }
 
-print("Files found:")
-print(f"Train: {len(files_dict['train'])} files")
-print(f"Val: {len(files_dict['val'])} files") 
-print(f"Test: {len(files_dict['test'])} files")
-print("Test files:", files_dict['test'])
+print(files_dict)
 
 dataset = {
     'train': list(),
     'val': list(),
     'test': list(),
 }
-os.makedirs('../data/BCIC2020_datasets/processed', exist_ok=True)
-db = lmdb.open('../data/BCIC2020_datasets/processed', map_size=3000000000)
+
+db = lmdb.open('/data/datasets/BigDownstream/Imagined speech/processed', map_size=3000000000)
 
 for file in files_dict['train']:
     data = scipy.io.loadmat(os.path.join(train_dir, file))
@@ -75,7 +71,7 @@ for file in files_dict['val']:
         dataset['val'].append(sample_key)
 
 
-df = pd.read_excel("../Raw_data/BCIC2020/Test set/Track3_Answer Sheet_Test.xlsx")
+df = pd.read_excel("/data/datasets/BigDownstream/Imagined speech/mat/Track3_Answer Sheet_Test.xlsx")
 df_=df.head(53)
 all_labels=df_.values
 print(all_labels.shape)
@@ -84,20 +80,9 @@ print(all_labels.shape)
 print(all_labels)
 
 for j, file in enumerate(files_dict['test']):
-    file_path = os.path.join(test_dir, file)
-    print(f"Trying to open: {file_path}")
-    print(f"File exists: {os.path.exists(file_path)}")
-    if os.path.exists(file_path):
-        print(f"File size: {os.path.getsize(file_path)} bytes")
-    
-    try:
-        data = h5py.File(file_path, 'r')
-
-        eeg = data['epo_test']['x'][:]
-        labels = all_labels[j]
-    except Exception as e:
-        print(f"Error opening {file}: {e}")
-        continue
+    data = h5py.File(os.path.join(test_dir, file))
+    eeg = data['epo_test']['x'][:]
+    labels = all_labels[j]
     eeg = eeg[:, :, -768:]
     eeg = signal.resample(eeg, 600, axis=2).reshape(50, 64, 3, 200)
     print(eeg.shape, labels.shape)

@@ -129,7 +129,7 @@ class MambaVisionMixer(nn.Module):
         return y.transpose(1,2)
 
 class Attention(nn.Module):
-    def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0., proj_drop=0.):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, attn_drop=0.1, proj_drop=0.1):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim // num_heads
@@ -142,6 +142,8 @@ class Attention(nn.Module):
 
     def forward(self, x):
         B, N, C = x.shape
+        identity = x  # 保存输入用于残差连接
+        
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv.unbind(0)
 
@@ -152,6 +154,9 @@ class Attention(nn.Module):
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
         x = self.proj_drop(x)
+        
+        # 在attention模块内部添加残差连接
+        x = x + identity
         return x
 
 class HybridBlock(nn.Module):
@@ -200,7 +205,7 @@ class HybridMamba(nn.Module):
     """
     def __init__(self, in_chans , patch_size=200, out_dim=200,
                  d_model=200, depths=[2,2,6,2], num_heads=[4,8,10,20],
-                 mlp_ratio=4., qkv_bias=True, drop_rate=0., attn_drop_rate=0.,
+                 mlp_ratio=4., qkv_bias=True, drop_rate=0.1, attn_drop_rate=0.,
                  drop_path_rate=0.1, norm_layer=nn.LayerNorm, 
                  hybrid_mode='alternate', custom_depths=None,stage_types=None, num_classes=2):
         super().__init__()
@@ -278,17 +283,27 @@ class HybridMamba(nn.Module):
             # nn.GELU(),
             nn.Linear(d_model, out_dim),
         )
-
-        self.classifier = nn.Sequential(   # 'avgpooling_patch_reps'
-            Rearrange('b c s d -> b d c s'),
-            nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Flatten(),
-            nn.Dropout(0.1),  # 减少 dropout
-            nn.Linear(d_model, d_model // 2),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(d_model // 2, num_classes),
-        )
+        if num_classes > 2:
+            self.classifier = nn.Sequential(   
+                Rearrange('b c s d -> b d c s'),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Dropout(0.1),  # 减少 dropout
+                nn.Linear(d_model, d_model // 2),
+                nn.ReLU(),
+                nn.Dropout(0.1),
+                nn.Linear(d_model // 2, num_classes),
+            )
+        else:
+            self.classifier = nn.Sequential(   
+                Rearrange('b c s d -> b d c s'),
+                nn.AdaptiveAvgPool2d((1, 1)),
+                nn.Flatten(),
+                nn.Dropout(0.1),  # 减少 dropout
+                nn.Linear(d_model, 1),
+                nn.Sigmoid(),
+                Rearrange('b 1 -> (b 1)')
+            )
 
         self.norm = norm_layer(d_model)
 
@@ -328,9 +343,6 @@ class HybridMamba(nn.Module):
     def forward(self, x):
         x = self.forward_features(x)
         x = self.classifier(x)
-        if self.num_classes == 1:
-            return x.squeeze(-1)  # 二分类：(batch, 1) -> (batch,)
-        else:
-            return x  # 多分类：保持 (batch, num_classes)
+        return x  # 统一返回 (batch, num_classes)
 
 

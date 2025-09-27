@@ -12,6 +12,9 @@ Raw_data/
 *.lmdb
 *.db
 
+
+logs/
+tmp/
 # Python 相关
 __pycache__/
 *.py[cod]
