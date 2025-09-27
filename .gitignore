@@ -13,7 +13,7 @@ Raw_data/
 *.db
 
 
-logs/
+
 tmp/
 # Python 相关
 __pycache__/
@@ -49,9 +49,6 @@ ENV/
 *.swo
 *~
 
-# 日志文件
-*.log
-logs/
 
 # 临时文件
 .tmp/

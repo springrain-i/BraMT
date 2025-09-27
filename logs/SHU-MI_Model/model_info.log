@@ -1,0 +1,3 @@
+2025-09-27 09:59:32,878 - INFO - Total parameters: 27,079,201
+2025-09-27 09:59:32,878 - INFO - Trainable parameters: 27,079,001
+2025-09-27 09:59:32,878 - INFO - Model architecture saved to logs/SHU-MI_Model/model_architecture.txt

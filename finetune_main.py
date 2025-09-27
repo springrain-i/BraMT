@@ -57,7 +57,7 @@ def main():
 
     # Hybrid model settings
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
-    parser.add_argument('--depths', type=str, default='2,10', help='depths')
+    parser.add_argument('--depths', type=str, default='12,12', help='depths')
 
     params = parser.parse_args()
     print(params)

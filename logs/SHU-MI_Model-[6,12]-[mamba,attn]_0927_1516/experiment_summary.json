@@ -1,0 +1,14 @@
+{
+  "experiment_name": "SHU-MI_Model-[6,12]-[mamba,attn]_0927_1516",
+  "total_train_steps": 50,
+  "total_val_steps": 50,
+  "experiment_duration": "2025-09-27T15:38:32.470071",
+  "best_validation_metrics": {
+    "epoch": 3,
+    "val_loss": 0.6761384010314941,
+    "timestamp": "2025-09-27T15:17:48.225828",
+    "val_acc": 0.6502729743852154,
+    "val_pr_auc": 0.7367373642463062,
+    "val_roc_auc": 0.7059619825805387
+  }
+}

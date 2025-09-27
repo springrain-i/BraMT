@@ -1,0 +1,171 @@
+2025-09-27 14:37:41,441 - INFO - Experiment config saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/config.json
+2025-09-27 14:37:53,695 - INFO - Epoch 1, Step 34, Loss: 2.261843, LR: 0.000100, training_time_mins: 0.203362
+2025-09-27 14:37:53,696 - INFO - Validation - Epoch 1, Loss: 2.261843, val_acc: 0.502022, val_pr_auc: 0.557348, val_roc_auc: 0.593903
+2025-09-27 14:37:53,696 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:37:57,156 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:37:57,156 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:38:05,319 - INFO - Epoch 2, Step 68, Loss: 0.741113, LR: 0.000100, training_time_mins: 0.169243
+2025-09-27 14:38:05,319 - INFO - Validation - Epoch 2, Loss: 0.741113, val_acc: 0.503687, val_pr_auc: 0.683143, val_roc_auc: 0.682171
+2025-09-27 14:38:05,320 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:06,963 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:38:06,963 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:38:16,955 - INFO - Epoch 3, Step 102, Loss: 0.706155, LR: 0.000099, training_time_mins: 0.166504
+2025-09-27 14:38:16,955 - INFO - Validation - Epoch 3, Loss: 0.706155, val_acc: 0.523636, val_pr_auc: 0.708386, val_roc_auc: 0.671535
+2025-09-27 14:38:16,957 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:26,860 - INFO - Epoch 4, Step 136, Loss: 0.608067, LR: 0.000098, training_time_mins: 0.165041
+2025-09-27 14:38:26,860 - INFO - Validation - Epoch 4, Loss: 0.608067, val_acc: 0.615004, val_pr_auc: 0.723184, val_roc_auc: 0.700279
+2025-09-27 14:38:26,861 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:28,169 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:38:28,169 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:38:36,035 - INFO - Epoch 5, Step 170, Loss: 0.496909, LR: 0.000098, training_time_mins: 0.164231
+2025-09-27 14:38:36,035 - INFO - Validation - Epoch 5, Loss: 0.496909, val_acc: 0.595986, val_pr_auc: 0.704364, val_roc_auc: 0.674942
+2025-09-27 14:38:36,036 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:45,936 - INFO - Epoch 6, Step 204, Loss: 0.346720, LR: 0.000097, training_time_mins: 0.164984
+2025-09-27 14:38:45,936 - INFO - Validation - Epoch 6, Loss: 0.346720, val_acc: 0.638471, val_pr_auc: 0.720311, val_roc_auc: 0.695986
+2025-09-27 14:38:45,937 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:56,044 - INFO - Epoch 7, Step 238, Loss: 0.262276, LR: 0.000095, training_time_mins: 0.168422
+2025-09-27 14:38:56,044 - INFO - Validation - Epoch 7, Loss: 0.262276, val_acc: 0.647181, val_pr_auc: 0.724051, val_roc_auc: 0.707933
+2025-09-27 14:38:56,045 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:38:57,294 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:38:57,294 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:39:05,222 - INFO - Epoch 8, Step 272, Loss: 0.200110, LR: 0.000094, training_time_mins: 0.165154
+2025-09-27 14:39:05,222 - INFO - Validation - Epoch 8, Loss: 0.200110, val_acc: 0.624905, val_pr_auc: 0.719666, val_roc_auc: 0.703044
+2025-09-27 14:39:05,223 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:39:15,230 - INFO - Epoch 9, Step 306, Loss: 0.131259, LR: 0.000092, training_time_mins: 0.166746
+2025-09-27 14:39:15,230 - INFO - Validation - Epoch 9, Loss: 0.131259, val_acc: 0.642779, val_pr_auc: 0.717049, val_roc_auc: 0.703756
+2025-09-27 14:39:15,231 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:39:25,303 - INFO - Epoch 10, Step 340, Loss: 0.111078, LR: 0.000091, training_time_mins: 0.167843
+2025-09-27 14:39:25,303 - INFO - Validation - Epoch 10, Loss: 0.111078, val_acc: 0.626299, val_pr_auc: 0.722727, val_roc_auc: 0.705500
+2025-09-27 14:39:25,304 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:39:33,173 - INFO - Epoch 11, Step 374, Loss: 0.106820, LR: 0.000089, training_time_mins: 0.165191
+2025-09-27 14:39:33,174 - INFO - Validation - Epoch 11, Loss: 0.106820, val_acc: 0.634772, val_pr_auc: 0.721854, val_roc_auc: 0.695463
+2025-09-27 14:39:33,174 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:39:43,017 - INFO - Epoch 12, Step 408, Loss: 0.071053, LR: 0.000087, training_time_mins: 0.164025
+2025-09-27 14:39:43,017 - INFO - Validation - Epoch 12, Loss: 0.071053, val_acc: 0.631984, val_pr_auc: 0.733105, val_roc_auc: 0.712336
+2025-09-27 14:39:43,017 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:39:44,330 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:39:44,331 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:39:54,334 - INFO - Epoch 13, Step 442, Loss: 0.051163, LR: 0.000084, training_time_mins: 0.166679
+2025-09-27 14:39:54,334 - INFO - Validation - Epoch 13, Loss: 0.051163, val_acc: 0.639758, val_pr_auc: 0.711722, val_roc_auc: 0.698942
+2025-09-27 14:39:54,335 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:02,544 - INFO - Epoch 14, Step 476, Loss: 0.058875, LR: 0.000082, training_time_mins: 0.166908
+2025-09-27 14:40:02,544 - INFO - Validation - Epoch 14, Loss: 0.058875, val_acc: 0.620423, val_pr_auc: 0.714335, val_roc_auc: 0.688209
+2025-09-27 14:40:02,544 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:12,480 - INFO - Epoch 15, Step 510, Loss: 0.058615, LR: 0.000080, training_time_mins: 0.165568
+2025-09-27 14:40:12,480 - INFO - Validation - Epoch 15, Loss: 0.058615, val_acc: 0.637740, val_pr_auc: 0.727441, val_roc_auc: 0.705797
+2025-09-27 14:40:12,480 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:22,418 - INFO - Epoch 16, Step 544, Loss: 0.045929, LR: 0.000077, training_time_mins: 0.165618
+2025-09-27 14:40:22,418 - INFO - Validation - Epoch 16, Loss: 0.045929, val_acc: 0.638798, val_pr_auc: 0.726333, val_roc_auc: 0.700244
+2025-09-27 14:40:22,419 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:32,305 - INFO - Epoch 17, Step 578, Loss: 0.048453, LR: 0.000074, training_time_mins: 0.164742
+2025-09-27 14:40:32,305 - INFO - Validation - Epoch 17, Loss: 0.048453, val_acc: 0.645733, val_pr_auc: 0.727736, val_roc_auc: 0.712516
+2025-09-27 14:40:32,306 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:33,578 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:40:33,578 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:40:41,604 - INFO - Epoch 18, Step 612, Loss: 0.035526, LR: 0.000072, training_time_mins: 0.166073
+2025-09-27 14:40:41,604 - INFO - Validation - Epoch 18, Loss: 0.035526, val_acc: 0.627749, val_pr_auc: 0.716152, val_roc_auc: 0.696958
+2025-09-27 14:40:41,605 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:40:51,543 - INFO - Epoch 19, Step 646, Loss: 0.026298, LR: 0.000069, training_time_mins: 0.165608
+2025-09-27 14:40:51,543 - INFO - Validation - Epoch 19, Loss: 0.026298, val_acc: 0.641745, val_pr_auc: 0.723102, val_roc_auc: 0.706551
+2025-09-27 14:40:51,543 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:01,519 - INFO - Epoch 20, Step 680, Loss: 0.032698, LR: 0.000066, training_time_mins: 0.166228
+2025-09-27 14:41:01,519 - INFO - Validation - Epoch 20, Loss: 0.032698, val_acc: 0.645119, val_pr_auc: 0.721113, val_roc_auc: 0.705995
+2025-09-27 14:41:01,519 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:09,372 - INFO - Epoch 21, Step 714, Loss: 0.016030, LR: 0.000063, training_time_mins: 0.163372
+2025-09-27 14:41:09,372 - INFO - Validation - Epoch 21, Loss: 0.016030, val_acc: 0.645505, val_pr_auc: 0.719596, val_roc_auc: 0.710719
+2025-09-27 14:41:09,373 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:19,327 - INFO - Epoch 22, Step 748, Loss: 0.017532, LR: 0.000060, training_time_mins: 0.165857
+2025-09-27 14:41:19,327 - INFO - Validation - Epoch 22, Loss: 0.017532, val_acc: 0.635376, val_pr_auc: 0.708324, val_roc_auc: 0.697551
+2025-09-27 14:41:19,328 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:29,379 - INFO - Epoch 23, Step 782, Loss: 0.025201, LR: 0.000057, training_time_mins: 0.167497
+2025-09-27 14:41:29,379 - INFO - Validation - Epoch 23, Loss: 0.025201, val_acc: 0.629554, val_pr_auc: 0.716709, val_roc_auc: 0.700631
+2025-09-27 14:41:29,380 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:37,594 - INFO - Epoch 24, Step 816, Loss: 0.019825, LR: 0.000054, training_time_mins: 0.168103
+2025-09-27 14:41:37,594 - INFO - Validation - Epoch 24, Loss: 0.019825, val_acc: 0.631754, val_pr_auc: 0.716855, val_roc_auc: 0.693339
+2025-09-27 14:41:37,595 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:47,591 - INFO - Epoch 25, Step 850, Loss: 0.015655, LR: 0.000050, training_time_mins: 0.166589
+2025-09-27 14:41:47,591 - INFO - Validation - Epoch 25, Loss: 0.015655, val_acc: 0.633397, val_pr_auc: 0.721569, val_roc_auc: 0.706841
+2025-09-27 14:41:47,591 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:41:57,606 - INFO - Epoch 26, Step 884, Loss: 0.007999, LR: 0.000047, training_time_mins: 0.166900
+2025-09-27 14:41:57,606 - INFO - Validation - Epoch 26, Loss: 0.007999, val_acc: 0.638722, val_pr_auc: 0.722412, val_roc_auc: 0.707249
+2025-09-27 14:41:57,607 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:05,637 - INFO - Epoch 27, Step 918, Loss: 0.012636, LR: 0.000044, training_time_mins: 0.167380
+2025-09-27 14:42:05,637 - INFO - Validation - Epoch 27, Loss: 0.012636, val_acc: 0.650292, val_pr_auc: 0.727038, val_roc_auc: 0.707052
+2025-09-27 14:42:05,638 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:15,612 - INFO - Epoch 28, Step 952, Loss: 0.006871, LR: 0.000041, training_time_mins: 0.166212
+2025-09-27 14:42:15,612 - INFO - Validation - Epoch 28, Loss: 0.006871, val_acc: 0.652831, val_pr_auc: 0.729007, val_roc_auc: 0.711023
+2025-09-27 14:42:15,613 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:25,562 - INFO - Epoch 29, Step 986, Loss: 0.006239, LR: 0.000038, training_time_mins: 0.165779
+2025-09-27 14:42:25,562 - INFO - Validation - Epoch 29, Loss: 0.006239, val_acc: 0.638231, val_pr_auc: 0.730852, val_roc_auc: 0.709256
+2025-09-27 14:42:25,562 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:35,607 - INFO - Epoch 30, Step 1020, Loss: 0.008756, LR: 0.000035, training_time_mins: 0.167403
+2025-09-27 14:42:35,608 - INFO - Validation - Epoch 30, Loss: 0.008756, val_acc: 0.640031, val_pr_auc: 0.728493, val_roc_auc: 0.706909
+2025-09-27 14:42:35,608 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:43,696 - INFO - Epoch 31, Step 1054, Loss: 0.005882, LR: 0.000032, training_time_mins: 0.167008
+2025-09-27 14:42:43,696 - INFO - Validation - Epoch 31, Loss: 0.005882, val_acc: 0.640363, val_pr_auc: 0.733046, val_roc_auc: 0.713416
+2025-09-27 14:42:43,696 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:42:45,147 - INFO - Best model saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/best_model.pth
+2025-09-27 14:42:45,147 - INFO - Checkpoint saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/latest_checkpoint.pth
+2025-09-27 14:42:55,256 - INFO - Epoch 32, Step 1088, Loss: 0.004172, LR: 0.000029, training_time_mins: 0.168463
+2025-09-27 14:42:55,256 - INFO - Validation - Epoch 32, Loss: 0.004172, val_acc: 0.640446, val_pr_auc: 0.732129, val_roc_auc: 0.710672
+2025-09-27 14:42:55,257 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:05,341 - INFO - Epoch 33, Step 1122, Loss: 0.005256, LR: 0.000027, training_time_mins: 0.168040
+2025-09-27 14:43:05,341 - INFO - Validation - Epoch 33, Loss: 0.005256, val_acc: 0.644602, val_pr_auc: 0.729412, val_roc_auc: 0.710045
+2025-09-27 14:43:05,341 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:13,074 - INFO - Epoch 34, Step 1156, Loss: 0.006511, LR: 0.000024, training_time_mins: 0.163088
+2025-09-27 14:43:13,074 - INFO - Validation - Epoch 34, Loss: 0.006511, val_acc: 0.645828, val_pr_auc: 0.721565, val_roc_auc: 0.703999
+2025-09-27 14:43:13,075 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:23,179 - INFO - Epoch 35, Step 1190, Loss: 0.004255, LR: 0.000021, training_time_mins: 0.168384
+2025-09-27 14:43:23,180 - INFO - Validation - Epoch 35, Loss: 0.004255, val_acc: 0.642997, val_pr_auc: 0.720030, val_roc_auc: 0.706347
+2025-09-27 14:43:23,180 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:33,215 - INFO - Epoch 36, Step 1224, Loss: 0.003304, LR: 0.000019, training_time_mins: 0.167231
+2025-09-27 14:43:33,215 - INFO - Validation - Epoch 36, Loss: 0.003304, val_acc: 0.649626, val_pr_auc: 0.721301, val_roc_auc: 0.707514
+2025-09-27 14:43:33,216 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:41,506 - INFO - Epoch 37, Step 1258, Loss: 0.002851, LR: 0.000017, training_time_mins: 0.168336
+2025-09-27 14:43:41,507 - INFO - Validation - Epoch 37, Loss: 0.002851, val_acc: 0.647876, val_pr_auc: 0.724190, val_roc_auc: 0.707544
+2025-09-27 14:43:41,511 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:43:51,574 - INFO - Epoch 38, Step 1292, Loss: 0.003334, LR: 0.000014, training_time_mins: 0.167695
+2025-09-27 14:43:51,574 - INFO - Validation - Epoch 38, Loss: 0.003334, val_acc: 0.648618, val_pr_auc: 0.726540, val_roc_auc: 0.708618
+2025-09-27 14:43:51,575 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:01,674 - INFO - Epoch 39, Step 1326, Loss: 0.002264, LR: 0.000012, training_time_mins: 0.168307
+2025-09-27 14:44:01,675 - INFO - Validation - Epoch 39, Loss: 0.002264, val_acc: 0.645740, val_pr_auc: 0.726894, val_roc_auc: 0.708450
+2025-09-27 14:44:01,675 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:09,668 - INFO - Epoch 40, Step 1360, Loss: 0.002590, LR: 0.000010, training_time_mins: 0.165498
+2025-09-27 14:44:09,669 - INFO - Validation - Epoch 40, Loss: 0.002590, val_acc: 0.646949, val_pr_auc: 0.725884, val_roc_auc: 0.707605
+2025-09-27 14:44:09,669 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:19,635 - INFO - Epoch 41, Step 1394, Loss: 0.002606, LR: 0.000009, training_time_mins: 0.166087
+2025-09-27 14:44:19,636 - INFO - Validation - Epoch 41, Loss: 0.002606, val_acc: 0.647777, val_pr_auc: 0.727584, val_roc_auc: 0.708257
+2025-09-27 14:44:19,636 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:29,701 - INFO - Epoch 42, Step 1428, Loss: 0.002808, LR: 0.000007, training_time_mins: 0.167727
+2025-09-27 14:44:29,701 - INFO - Validation - Epoch 42, Loss: 0.002808, val_acc: 0.645747, val_pr_auc: 0.727102, val_roc_auc: 0.708790
+2025-09-27 14:44:29,702 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:37,650 - INFO - Epoch 43, Step 1462, Loss: 0.002578, LR: 0.000006, training_time_mins: 0.164276
+2025-09-27 14:44:37,650 - INFO - Validation - Epoch 43, Loss: 0.002578, val_acc: 0.646179, val_pr_auc: 0.726682, val_roc_auc: 0.708559
+2025-09-27 14:44:37,651 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:47,513 - INFO - Epoch 44, Step 1496, Loss: 0.002154, LR: 0.000004, training_time_mins: 0.164356
+2025-09-27 14:44:47,513 - INFO - Validation - Epoch 44, Loss: 0.002154, val_acc: 0.644135, val_pr_auc: 0.724110, val_roc_auc: 0.707562
+2025-09-27 14:44:47,514 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:44:57,618 - INFO - Epoch 45, Step 1530, Loss: 0.002361, LR: 0.000003, training_time_mins: 0.168377
+2025-09-27 14:44:57,618 - INFO - Validation - Epoch 45, Loss: 0.002361, val_acc: 0.643713, val_pr_auc: 0.724553, val_roc_auc: 0.707500
+2025-09-27 14:44:57,619 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:07,653 - INFO - Epoch 46, Step 1564, Loss: 0.002083, LR: 0.000003, training_time_mins: 0.167207
+2025-09-27 14:45:07,653 - INFO - Validation - Epoch 46, Loss: 0.002083, val_acc: 0.642888, val_pr_auc: 0.725078, val_roc_auc: 0.707772
+2025-09-27 14:45:07,654 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:15,692 - INFO - Epoch 47, Step 1598, Loss: 0.002368, LR: 0.000002, training_time_mins: 0.166511
+2025-09-27 14:45:15,692 - INFO - Validation - Epoch 47, Loss: 0.002368, val_acc: 0.643296, val_pr_auc: 0.725044, val_roc_auc: 0.707873
+2025-09-27 14:45:15,693 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:25,751 - INFO - Epoch 48, Step 1632, Loss: 0.002301, LR: 0.000001, training_time_mins: 0.167616
+2025-09-27 14:45:25,752 - INFO - Validation - Epoch 48, Loss: 0.002301, val_acc: 0.644519, val_pr_auc: 0.725230, val_roc_auc: 0.708061
+2025-09-27 14:45:25,752 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:35,710 - INFO - Epoch 49, Step 1666, Loss: 0.002586, LR: 0.000001, training_time_mins: 0.165941
+2025-09-27 14:45:35,710 - INFO - Validation - Epoch 49, Loss: 0.002586, val_acc: 0.644932, val_pr_auc: 0.725207, val_roc_auc: 0.708033
+2025-09-27 14:45:35,711 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:43,680 - INFO - Epoch 50, Step 1700, Loss: 0.002265, LR: 0.000001, training_time_mins: 0.164827
+2025-09-27 14:45:43,680 - INFO - Validation - Epoch 50, Loss: 0.002265, val_acc: 0.643701, val_pr_auc: 0.725209, val_roc_auc: 0.708038
+2025-09-27 14:45:43,680 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:47,211 - INFO - Final Test Results:
+2025-09-27 14:45:47,211 - INFO - Test Accuracy: 0.60386
+2025-09-27 14:45:47,211 - INFO - Test PR AUC: 0.65098
+2025-09-27 14:45:47,211 - INFO - Test ROC AUC: 0.65733
+2025-09-27 14:45:47,211 - INFO - Confusion matrix saved to logs/SHU-MI_Model-[5,7]-[mamba,attn]_0927_1437/confusion_matrix.txt
+2025-09-27 14:45:48,003 - INFO - Experiment completed and logged successfully

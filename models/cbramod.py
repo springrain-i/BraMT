@@ -11,6 +11,7 @@ class CBraMod(nn.Module):
                     depths=[12],stage_types=['attn']
                     ):
         super().__init__()
+        print("depths:", depths, "stage_types:", stage_types)
         self.patch_embedding = PatchEmbedding(in_dim, out_dim, d_model, seq_len)
         '''
         下方使用crisscross
