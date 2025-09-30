@@ -1,5 +1,0 @@
-Confusion Matrix:
-[[610 559]
- [370 808]]
-
-Class Names: ['Class_0', 'Class_1']

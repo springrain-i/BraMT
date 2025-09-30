@@ -11,7 +11,9 @@ class Model(nn.Module):
         self.backbone = CBraMod(
             in_dim=200, out_dim=200, d_model=200,
             dim_feedforward=800, seq_len=30,
-            n_layer=12, nhead=8
+            n_layer=12, nhead=8,
+            depths=[int(x) for x in param.depths.split(',')],
+            stage_types=[x for x in param.stage_types.split(',')]
         )
         if param.use_pretrained_weights:
             map_location = torch.device(f'cuda:{param.cuda}')

@@ -163,28 +163,6 @@ class ModelLogger:
                 index=False
             )
     
-    def save_model_checkpoint(self, model, optimizer, epoch, metrics, is_best=False):
-        """保存模型检查点"""
-        checkpoint = {
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'metrics': metrics,
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        # 保存最新检查点
-        checkpoint_path = os.path.join(self.experiment_dir, 'latest_checkpoint.pth')
-        torch.save(checkpoint, checkpoint_path)
-        
-        # 如果是最佳模型，也保存一份
-        if is_best:
-            best_path = os.path.join(self.experiment_dir, 'best_model.pth')
-            torch.save(checkpoint, best_path)
-            self.train_logger.info(f"Best model saved to {best_path}")
-        
-        self.train_logger.info(f"Checkpoint saved to {checkpoint_path}")
-    
     def log_confusion_matrix(self, cm, class_names=None):
         """记录混淆矩阵"""
         cm_file = os.path.join(self.experiment_dir, 'confusion_matrix.txt')

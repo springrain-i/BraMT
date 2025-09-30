@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from models.base_transformer import SimpleTransformerEncoderLayer, SimpleTransformerEncoder
 from models.hybrid import HybridEncoderLayer, HybridEncoder
-
+from models.criss_cross_transformer import TransformerEncoder, TransformerEncoderLayer
 class CBraMod(nn.Module):
     def __init__(self, in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,
                     nhead=8,

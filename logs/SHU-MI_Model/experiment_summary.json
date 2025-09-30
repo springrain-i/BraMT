@@ -1,8 +1,0 @@
-{
-  "experiment_name": "SHU-MI_Model",
-  "total_train_steps": 50,
-  "total_val_steps": 50,
-  "experiment_duration": "2025-09-27T10:11:28.513299",
-  "best_validation_metrics": {
-    "epoch": 5,
-    "val_loss": 

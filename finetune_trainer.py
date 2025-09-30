@@ -40,7 +40,6 @@ class Trainer(object):
             self.criterion = MSELoss().cuda()
 
         self.best_model_states = None
-
         backbone_params = []
         other_params = []
         for name, param in self.model.named_parameters():
@@ -54,21 +53,75 @@ class Trainer(object):
             else:
                 other_params.append(param)
 
+        # if self.params.optimizer == 'AdamW':
+        #     if self.params.multi_lr: # set different learning rates for different modules
+        #         self.optimizer = torch.optim.AdamW([
+        #             {'params': backbone_params, 'lr': self.params.lr},
+        #             {'params': other_params, 'lr': self.params.lr * 5}
+        #         ], weight_decay=self.params.weight_decay)
+        #     else:
+        #         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.params.lr,
+        #                                            weight_decay=self.params.weight_decay)
+        # else:
+        #     if self.params.multi_lr:
+        #         self.optimizer = torch.optim.SGD([
+        #             {'params': backbone_params, 'lr': self.params.lr},
+        #             {'params': other_params, 'lr': self.params.lr * 5}
+        #         ],  momentum=0.9, weight_decay=self.params.weight_decay)
+        #     else:
+        #         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.params.lr, momentum=0.9,
+        #                                          weight_decay=self.params.weight_decay)
+
+        #先分组：mamba/attn/other
+        mamba_params = []
+        attn_params = []
+        other_params = []
+        for name, param in self.model.named_parameters():
+            lname = name.lower()
+            if "mamba" in lname:
+                mamba_params.append(param)
+            elif "attention" in lname:
+                attn_params.append(param)
+            else:
+                other_params.append(param)
+        
+        # 可选冻结backbone参数
+        for name, param in self.model.named_parameters():
+            if "backbone" in name:
+                if params.frozen:
+                    param.requires_grad = False
+                else:
+                    param.requires_grad = True
+
+
+        # 支持自定义lr_mamba/lr_attn/lr_other
+        lr_mamba = getattr(self.params, 'lr_mamba', self.params.lr)
+        lr_attn = getattr(self.params, 'lr_attn', self.params.lr)
+        lr_other = getattr(self.params, 'lr_other', self.params.lr)
+
         if self.params.optimizer == 'AdamW':
-            if self.params.multi_lr: # set different learning rates for different modules
-                self.optimizer = torch.optim.AdamW([
-                    {'params': backbone_params, 'lr': self.params.lr},
-                    {'params': other_params, 'lr': self.params.lr * 5}
-                ], weight_decay=self.params.weight_decay)
+            if self.params.multi_lr:
+                param_groups = []
+                if attn_params:
+                    param_groups.append({'params': attn_params, 'lr': lr_attn})
+                if mamba_params:
+                    param_groups.append({'params': mamba_params, 'lr': lr_mamba*0.5})
+                if other_params:
+                    param_groups.append({'params': other_params, 'lr': lr_other * 5})
+                self.optimizer = torch.optim.AdamW(param_groups, weight_decay=self.params.weight_decay)
             else:
                 self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.params.lr,
                                                    weight_decay=self.params.weight_decay)
         else:
             if self.params.multi_lr:
-                self.optimizer = torch.optim.SGD([
-                    {'params': backbone_params, 'lr': self.params.lr},
-                    {'params': other_params, 'lr': self.params.lr * 5}
-                ],  momentum=0.9, weight_decay=self.params.weight_decay)
+                param_groups = []
+                if attn_params:
+                    param_groups.append({'params': attn_params, 'lr': lr_attn})
+                if mamba_params:
+                    param_groups.append({'params': mamba_params, 'lr': lr_mamba*0.5})
+                if other_params:
+                    param_groups.append({'params': other_params, 'lr': lr_other * 5})
+                self.optimizer = torch.optim.SGD(param_groups, momentum=0.9, weight_decay=self.params.weight_decay)
             else:
                 self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.params.lr, momentum=0.9,
                                                  weight_decay=self.params.weight_decay)
@@ -89,13 +142,14 @@ class Trainer(object):
         
         # 添加时间戳确保唯一性
         timestamp = datetime.now().strftime("%m%d_%H%M")
-        return f"{base_name}_{timestamp}"
+        return f"{timestamp}_{base_name}"
 
     def train_for_multiclass(self):
         f1_best = 0
         kappa_best = 0
         acc_best = 0
         cm_best = None
+        best_f1_epoch = 0
         for epoch in range(self.params.epochs):
             self.model.train()
             start_time = timer()
@@ -114,28 +168,49 @@ class Trainer(object):
                 losses.append(loss.data.cpu().numpy())
                 if self.params.clip_value > 0:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.params.clip_value)
-                    # torch.nn.utils.clip_grad_value_(self.model.parameters(), self.params.clip_value)
                 self.optimizer.step()
                 self.optimizer_scheduler.step()
 
             optim_state = self.optimizer.state_dict()
 
+            # 验证集评估
             with torch.no_grad():
                 acc, kappa, f1, cm = self.val_eval.get_metrics_for_multiclass(self.model)
+                avg_loss = np.mean(losses)
+                current_lr = optim_state['param_groups'][0]['lr']
+                training_time = (timer() - start_time) / 60
                 print(
                     "Epoch {} : Training Loss: {:.5f}, acc: {:.5f}, kappa: {:.5f}, f1: {:.5f}, LR: {:.5f}, Time elapsed {:.2f} mins".format(
                         epoch + 1,
-                        np.mean(losses),
+                        avg_loss,
                         acc,
                         kappa,
                         f1,
-                        optim_state['param_groups'][0]['lr'],
-                        (timer() - start_time) / 60
+                        current_lr,
+                        training_time
                     )
                 )
                 print(cm)
-                if kappa > kappa_best:
-                    print("kappa increasing....saving weights !! ")
+
+                # 日志记录
+                self.logger.log_training_step(
+                    epoch=epoch + 1,
+                    step=len(self.data_loader['train']) * (epoch + 1),
+                    loss=avg_loss,
+                    lr=current_lr,
+                    metrics={
+                        'training_time_mins': training_time
+                    }
+                )
+                val_metrics = {
+                    'val_acc': acc,
+                    'val_kappa': kappa,
+                    'val_f1': f1
+                }
+                self.logger.log_validation_results(epoch + 1, avg_loss, val_metrics)
+
+                if acc > acc_best:
+                    print("acc increasing....saving weights !! ")
                     print("Val Evaluation: acc: {:.5f}, kappa: {:.5f}, f1: {:.5f}".format(
                         acc,
                         kappa,
@@ -147,24 +222,45 @@ class Trainer(object):
                     f1_best = f1
                     cm_best = cm
                     self.best_model_states = copy.deepcopy(self.model.state_dict())
+
+        # 恢复最佳模型
         self.model.load_state_dict(self.best_model_states)
         with torch.no_grad():
             print("***************************Test************************")
-            acc, kappa, f1, cm = self.test_eval.get_metrics_for_multiclass(self.model)
+            acc_test, kappa_test, f1_test, cm_test = self.test_eval.get_metrics_for_multiclass(self.model)
             print("***************************Test results************************")
             print(
                 "Test Evaluation: acc: {:.5f}, kappa: {:.5f}, f1: {:.5f}".format(
-                    acc,
-                    kappa,
-                    f1,
+                    acc_test,
+                    kappa_test,
+                    f1_test,
                 )
             )
-            print(cm)
+            print(cm_test)
+
+            # 日志记录最终测试结果
+            self.logger.train_logger.info("Final Test Results:")
+            self.logger.train_logger.info(f"Test Accuracy: {acc_test:.5f}")
+            self.logger.train_logger.info(f"Test Kappa: {kappa_test:.5f}")
+            self.logger.train_logger.info(f"Test F1: {f1_test:.5f}")
+
+            # 保存模型
             if not os.path.isdir(self.params.model_dir):
                 os.makedirs(self.params.model_dir)
-            model_path = self.params.model_dir + "/epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(best_f1_epoch, acc, kappa, f1)
+            model_path = self.params.model_dir + "/epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(best_f1_epoch, acc_test, kappa_test, f1_test)
             torch.save(self.model.state_dict(), model_path)
             print("model save in " + model_path)
+
+            # 写入summary文件
+            summary_path = os.path.join(self.logger.experiment_dir, "best_and_final_results.txt")
+            with open(summary_path, "w") as f:
+                f.write(f"Best Val Epoch: {best_f1_epoch}\n")
+                f.write(f"Best Val Acc: {acc_best:.5f}, Kappa: {kappa_best:.5f}, F1: {f1_best:.5f}\n")
+                f.write(f"Test Acc: {acc_test:.5f}, Kappa: {kappa_test:.5f}, F1: {f1_test:.5f}\n")
+            self.logger.train_logger.info(f"Best and final results written to {summary_path}")
+
+            # 完成实验日志记录
+            self.logger.finalize_experiment()
 
     def train_for_binaryclass(self):
         acc_best = 0
@@ -213,6 +309,7 @@ class Trainer(object):
                         training_time
                     )
                 )
+
                 print(cm)
                 
                 # 记录到日志文件
@@ -250,15 +347,8 @@ class Trainer(object):
                     cm_best = cm
                     self.best_model_states = copy.deepcopy(self.model.state_dict())
                     
-                    # 保存最佳模型检查点到日志目录
-                    best_metrics = {
-                        'val_acc': acc,
-                        'val_pr_auc': pr_auc,
-                        'val_roc_auc': roc_auc
-                    }
-                    self.logger.save_model_checkpoint(
-                        self.model, self.optimizer, epoch + 1, best_metrics, is_best=True
-                    )
+
+
         self.model.load_state_dict(self.best_model_states)
         with torch.no_grad():
             print("***************************Test************************")
@@ -292,6 +382,13 @@ class Trainer(object):
             torch.save(self.model.state_dict(), model_path)
             print("model save in " + model_path)
             
+            summary_path = os.path.join(self.logger.experiment_dir, "best_and_final_results.txt")
+            with open(summary_path, "w") as f:
+                f.write(f"Best Val Epoch: {best_f1_epoch}\n")
+                f.write(f"Best Val Acc: {acc_best:.5f}, pr_auc: {pr_auc_best:.5f}, roc_auc: {roc_auc_best:.5f}\n")
+                f.write(f"Test Acc: {acc:.5f}, pr_auc: {pr_auc:.5f}, roc_auc: {roc_auc:.5f}\n")
+            self.logger.train_logger.info(f"Best and final results written to {summary_path}")
+
             # 完成实验日志记录
             self.logger.finalize_experiment()
 

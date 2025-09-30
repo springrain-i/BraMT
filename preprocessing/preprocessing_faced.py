@@ -4,10 +4,10 @@ import os
 import lmdb
 import pickle
 import numpy as np
-
+import glob
 
 labels = np.array([0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8])
-root_dir = '/data/cyn/FACED/Processed_data'
+root_dir = '../Raw_data/FACED'
 files = [file for file in os.listdir(root_dir)]
 files = sorted(files)
 
@@ -22,13 +22,22 @@ dataset = {
     'val': list(),
     'test': list(),
 }
-
-db = lmdb.open('/data/datasets/BigDownstream/Faced/processed', map_size=6612500172)
+os.makedirs('../data/Faced/processed', exist_ok=True)
+db = lmdb.open('../data/Faced/processed', map_size=6612500172)
 
 for files_key in files_dict.keys():
-    for file in files_dict[files_key]:
-        f = open(os.path.join(root_dir, file), 'rb')
-        array = pickle.load(f)
+    for dir in files_dict[files_key]:
+        # 现在的file是subxxx
+        mat = glob.glob(os.path.join(root_dir, dir, '*.mat'))[0]
+        print(mat)
+        mat = scipy.io.loadmat(mat)
+        print(mat.keys())  # 查看有哪些键
+        print(mat['After_remark'].shape)
+        print(mat['After_remark'])
+        #array = pickle.load(f)
+        #print(file)
+        break         
+    break
         eeg = signal.resample(array, 6000, axis=2)
         eeg_ = eeg.reshape(28, 32, 30, 200)
         for i, (samples, label) in enumerate(zip(eeg_, labels)):

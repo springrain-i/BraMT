@@ -5,9 +5,9 @@ model_dir/
 *.pt
 *.ckpt
 
+logs/
 # 数据集相关
 data/
-datasets/
 Raw_data/
 *.lmdb
 *.db

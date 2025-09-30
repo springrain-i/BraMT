@@ -17,9 +17,9 @@ class MambaVisionMixer(nn.Module):
     def __init__(
         self,
         d_model,
-        d_state=16,
-        d_conv=4,
-        expand=2,
+        d_state=128,  # 状态空间的维度，决定每个通道的隐状态数量，影响模型的记忆能力和表达能力。 学长另一篇论文用的64
+        d_conv=4,  # 卷积核大小。用于局部混合（local mixing），决定卷积操作的感受野。
+        expand=2, # 通道扩展倍数。内部隐藏层的维度是 expand * d_model，影响模型容量
         dt_rank="auto",
         dt_min=0.001,
         dt_max=0.1,
@@ -252,6 +252,7 @@ class HybridEncoder(nn.Module):
         for i in range(len(depths)):
             for j in range(depths[i]):
                 layer_type = stage_types[i]
+                print(f"Building layer {len(self.layers)} as {layer_type}")
                 self.layers.append(
                     HybridEncoderLayer(
                         d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward,
