@@ -12,6 +12,10 @@ from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
 
+import os
+
+base_info_files = 'base_info.txt'
+
 class MambaVisionMixer(nn.Module):
     """Mamba mixer from HybridMamba"""
     def __init__(
@@ -20,14 +24,14 @@ class MambaVisionMixer(nn.Module):
         d_state=128,  # 状态空间的维度，决定每个通道的隐状态数量，影响模型的记忆能力和表达能力。 学长另一篇论文用的64
         d_conv=4,  # 卷积核大小。用于局部混合（local mixing），决定卷积操作的感受野。
         expand=2, # 通道扩展倍数。内部隐藏层的维度是 expand * d_model，影响模型容量
-        dt_rank="auto",
+        dt_rank="auto",  # 时间步长/离散化参数的低秩维度；控制多时间尺度门控的表达力与开销。
         dt_min=0.001,
         dt_max=0.1,
         dt_init="random",
         dt_scale=1.0,
         dt_init_floor=1e-4,
-        conv_bias=True,
-        bias=False,
+        conv_bias=True, #局部卷积是否有 bias。
+        bias=False, # 主线性投影（in_proj / out_proj）是否使用 bias。
         use_fast_path=True,
         layer_idx=None,
         device=None,
@@ -35,6 +39,11 @@ class MambaVisionMixer(nn.Module):
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
+        # 记录底层参数信息
+        with open(os.path.join(base_info_files), 'a') as f:
+            f.write(f"mamba layer--->d_model: {d_model}, d_state: {d_state}, d_conv: {d_conv}, expand: {expand}, conv_bias: {conv_bias}, bias: {bias}\n")
+            f.write("-------------------\n")
+
         self.d_model = d_model
         self.d_state = d_state
         self.d_conv = d_conv
@@ -153,8 +162,7 @@ class HybridEncoderLayer(nn.Module):
                  layer_norm_eps: float = 1e-5, batch_first: bool = True, norm_first: bool = True,
                  bias: bool = True, use_mamba: bool = False, 
                  # Mamba specific parameters
-                 d_state: int = 16, d_conv: int = 4, expand: int = 2,
-
+                 d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True,
                  device=None, dtype=None) -> None:
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
@@ -163,12 +171,19 @@ class HybridEncoderLayer(nn.Module):
         
         if use_mamba:
             # 使用Mamba mixer
+            print(f"Building MambaVisionMixer with d_model={d_model}, d_state={d_state}, d_conv={d_conv}, expand={expand}")
+
             self.mixer = MambaVisionMixer(
                 d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
+                conv_bias=conv_bias, bias=bias,
                 device=device, dtype=dtype
             )
         else:
             # 使用标准的多头自注意力
+            print(f"Building MultiheadAttention with d_model={d_model}, nhead={nhead}")
+            with open(os.path.join(base_info_files), 'a') as f:
+                f.write(f"attn layer--->d_model: {d_model}, nhead: {nhead}, dropout: {dropout} bias: {bias}\n")
+                f.write("-------------------\n")
             self.mixer = nn.MultiheadAttention(d_model, nhead, dropout=dropout,
                                              bias=bias, batch_first=batch_first,
                                              **factory_kwargs)
@@ -245,20 +260,27 @@ class HybridEncoder(nn.Module):
     def __init__(self, depths, stage_types, norm=None, d_model: int = 200, nhead: int = 8, dim_feedforward: int = 2048, dropout: float = 0.1,
                  activation: Union[str, Callable[[Tensor], Tensor]] = F.gelu,
                  layer_norm_eps: float = 1e-5, batch_first: bool = True, norm_first: bool = True,
-                 bias: bool = True, device=None, dtype=None) -> None:
+                 bias: bool = True, 
+                 # Mamba specific parameters
+                 d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True,
+                 device=None, dtype=None) -> None:
         super().__init__()
+
+        open(os.path.join(base_info_files), 'w').close() # 情况base_info
+
         self.layers = nn.ModuleList()
         # 在这里根据一个list来定义每一层的类型
         for i in range(len(depths)):
             for j in range(depths[i]):
                 layer_type = stage_types[i]
-                print(f"Building layer {len(self.layers)} as {layer_type}")
                 self.layers.append(
                     HybridEncoderLayer(
                         d_model=d_model, nhead=nhead, dim_feedforward=dim_feedforward,
+
                         batch_first=True, norm_first=True,
                         activation=F.gelu,
-                        use_mamba= (layer_type == "mamba")
+                        # Mamba specific parameters
+                        use_mamba= (layer_type == "mamba"), d_state=d_state, d_conv=d_conv, expand=expand, conv_bias=conv_bias
                     )
                 )
 
@@ -282,36 +304,16 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     # 测试不同的混合模式
-    model = HybridModel(
-        in_chans=32,
-        patch_size=200,
+    model = HybridEncoder(
         d_model=200,
-        num_layers=8,
+        d_state=16,
         nhead=8,
         dim_feedforward=800,
-        hybrid_mode='alternate',  # 可以改为其他模式测试
-        num_classes=2
+        depths=[6,6],
+        stage_types=['mamba','attn'],
     )
+
     model = model.to(device)
 
-    # 测试输入: (batch, channels, patches, features)
-    x = torch.randn((4, 32, 30, 200)).to(device)
-    y = model(x)
-    print(f"Input shape: {x.shape}")
-    print(f"Output shape: {y.shape}")
-    
-    # 测试自定义层类型
-    custom_model = HybridModel(
-        in_chans=32,
-        patch_size=200,
-        d_model=200,
-        num_layers=6,
-        nhead=8,
-        dim_feedforward=800,
-        hybrid_mode='custom',
-        layer_types=['mamba', 'mamba', 'attention', 'mamba', 'attention', 'attention'],
-        num_classes=2
-    )
-    custom_model = custom_model.to(device)
-    y_custom = custom_model(x)
-    print(f"Custom model output shape: {y_custom.shape}")
+    total_params = sum(p.numel() for p in model.parameters())
+    print(total_params)

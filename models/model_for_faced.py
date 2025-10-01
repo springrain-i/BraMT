@@ -2,16 +2,21 @@ import torch
 import torch.nn as nn
 from einops.layers.torch import Rearrange
 
-from .cbramod import CBraMod
+from models.BraMT import BraMT
 
 
 class Model(nn.Module):
     def __init__(self, param):
         super(Model, self).__init__()
-        self.backbone = CBraMod(
+        self.backbone = BraMT(
             in_dim=200, out_dim=200, d_model=200,
             dim_feedforward=800, seq_len=30,
-            n_layer=12, nhead=8
+            n_layer=12, nhead=8,
+
+            # Mamba specific parameters
+            depths=[int(x) for x in param.depths.split(',')],
+            stage_types=[x for x in param.stage_types.split(',')],
+            d_state= param.d_state, d_conv=param.d_conv, expand=param.expand, conv_bias=param.conv_bias
         )
 
         if param.use_pretrained_weights:

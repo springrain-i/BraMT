@@ -18,8 +18,9 @@ def main():
     parser.add_argument('--cuda', type=int, default=0, help='cuda number (default: 0)')
     parser.add_argument('--epochs', type=int, default=30, help='number of epochs (default: 5)')
 
-    parser.add_argument('--batch_size', type=int, default=64, help='batch size for training (default: 32)')
-    parser.add_argument('--lr', type=float, default=1e-6, help='learning rate (default: 1e-3)')
+
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size for training (default: 32)')
+    parser.add_argument('--lr', type=float, default=1e-5, help='learning rate (default: 1e-3)')
     parser.add_argument('--weight_decay', type=float, default=5e-2, help='weight decay (default: 1e-2)')
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
 
@@ -34,14 +35,14 @@ def main():
     # avgpooling_patch_reps: use average pooling for patch features;
 
     """############ Downstream dataset settings ############"""
-    parser.add_argument('--downstream_dataset', type=str, default='SHU-MI',
+    parser.add_argument('--downstream_dataset', type=str, default='FACED',
                         help='[FACED, SEED-V, PhysioNet-MI, SHU-MI, ISRUC, CHB-MIT, BCIC2020-3, Mumtaz2016, '
                              'SEED-VIG, MentalArithmetic, TUEV, TUAB, BCIC-IV-2a]')
     parser.add_argument('--datasets_dir', type=str,
-                        default='data/shu_datasets/processed',
+                        default='data/Faced/processed',
                         help='datasets_dir')
-    parser.add_argument('--num_of_classes', type=int, default=2, help='number of classes')
-    parser.add_argument('--model_dir', type=str, default='models/SHU-MI', help='model_dir')
+    parser.add_argument('--num_of_classes', type=int, default=9, help='number of classes')
+    parser.add_argument('--model_dir', type=str, default='models/Faced', help='model_dir')
     """############ Downstream dataset settings ############"""
 
     parser.add_argument('--num_workers', type=int, default=16, help='num_workers')
@@ -57,9 +58,14 @@ def main():
                         help='foundation_dir')
 
 
-    # Hybrid model settings
+    """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
     parser.add_argument('--depths', type=str, default='6,6', help='depths')
+    parser.add_argument('--d_state', type=int, default=16, help='d_state for Mamba')
+    parser.add_argument('--d_conv', type=int, default=4, help='d_conv for Mamba')
+    parser.add_argument('--expand', type=int, default=2, help='expand for Mamba')
+    parser.add_argument('--conv_bias', type=bool, default=True, help='conv_bias for Mamba')
+
 
     params = parser.parse_args()
     print(params)

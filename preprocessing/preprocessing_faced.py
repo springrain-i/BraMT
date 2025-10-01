@@ -26,18 +26,10 @@ os.makedirs('../data/Faced/processed', exist_ok=True)
 db = lmdb.open('../data/Faced/processed', map_size=6612500172)
 
 for files_key in files_dict.keys():
-    for dir in files_dict[files_key]:
-        # 现在的file是subxxx
-        mat = glob.glob(os.path.join(root_dir, dir, '*.mat'))[0]
-        print(mat)
-        mat = scipy.io.loadmat(mat)
-        print(mat.keys())  # 查看有哪些键
-        print(mat['After_remark'].shape)
-        print(mat['After_remark'])
-        #array = pickle.load(f)
-        #print(file)
-        break         
-    break
+    for file in files_dict[files_key]:
+        f = open(os.path.join(root_dir, file), 'rb')
+        array = pickle.load(f)
+
         eeg = signal.resample(array, 6000, axis=2)
         eeg_ = eeg.reshape(28, 32, 30, 200)
         for i, (samples, label) in enumerate(zip(eeg_, labels)):

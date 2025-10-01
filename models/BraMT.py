@@ -2,13 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models.base_transformer import SimpleTransformerEncoderLayer, SimpleTransformerEncoder
-from models.hybrid import HybridEncoderLayer, HybridEncoder
-from models.criss_cross_transformer import TransformerEncoder, TransformerEncoderLayer
-class CBraMod(nn.Module):
-    def __init__(self, in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,
-                    nhead=8,
-                    depths=[12],stage_types=['attn']
+from .base_transformer import SimpleTransformerEncoderLayer, SimpleTransformerEncoder
+from .hybrid import HybridEncoderLayer, HybridEncoder
+from .criss_cross_transformer import TransformerEncoder, TransformerEncoderLayer
+class BraMT(nn.Module):
+    def __init__(self, in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,nhead=8,
+                    activation=F.gelu, layer_norm_eps=1e-5, batch_first=True, norm_first=True, bias=True,
+                    # Mamba specific parameters
+                    depths=[6,6],stage_types=['mamba','attn'],
+                    d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True
                     ):
         super().__init__()
         print("depths:", depths, "stage_types:", stage_types)
@@ -34,14 +36,21 @@ class CBraMod(nn.Module):
         下方是hybrid
         '''
         self.encoder = HybridEncoder(
-            depths=depths,
-            stage_types=stage_types,
             d_model=d_model,
             nhead=nhead,
             dim_feedforward=dim_feedforward,
-            activation=F.gelu,
-            batch_first=True,
-            norm_first=True,
+            activation=activation,
+            batch_first=batch_first,
+            norm_first=norm_first,
+            layer_norm_eps=layer_norm_eps,
+            bias=bias,
+            # Mamba specific parameters
+            depths=depths,
+            stage_types=stage_types,
+            conv_bias=conv_bias,
+            d_state=d_state,
+            d_conv=d_conv,
+            expand=expand,
         )
         self.proj_out = nn.Sequential(
             # nn.Linear(d_model, d_model*2),
@@ -138,10 +147,9 @@ def _weights_init(m):
 if __name__ == '__main__':
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = CBraMod(in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,
+    model = BraMT(in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,
                     nhead=8).to(device)
-    model.load_state_dict(torch.load('pretrained_weights/pretrained_weights.pth',
-                                     map_location=device))
-    a = torch.randn((8, 16, 10, 200)).cuda()
-    b = model(a)
-    print(a.shape, b.shape)
+    # model.load_state_dict(torch.load('pretrained_weights/pretrained_weights.pth',
+    #                                  map_location=device))
+    for name, param in model.named_parameters():
+        print(name, param.shape)

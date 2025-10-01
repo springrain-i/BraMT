@@ -5,7 +5,11 @@ model_dir/
 *.pt
 *.ckpt
 
+*.sh
+tmp.*
+base_info.txt
 logs/
+
 # 数据集相关
 data/
 Raw_data/

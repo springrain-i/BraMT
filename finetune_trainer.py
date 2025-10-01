@@ -22,7 +22,7 @@ class Trainer(object):
         
         # 生成包含架构信息的实验名称
         experiment_name = self._generate_experiment_name(params, model)
-        self.logger = ModelLogger(log_dir="logs", experiment_name=experiment_name)
+        self.logger = ModelLogger(log_dir="logs", params=params, experiment_name=experiment_name)
         
         # 记录实验配置
         config_dict = vars(params) if hasattr(params, '__dict__') else params
@@ -53,26 +53,7 @@ class Trainer(object):
             else:
                 other_params.append(param)
 
-        # if self.params.optimizer == 'AdamW':
-        #     if self.params.multi_lr: # set different learning rates for different modules
-        #         self.optimizer = torch.optim.AdamW([
-        #             {'params': backbone_params, 'lr': self.params.lr},
-        #             {'params': other_params, 'lr': self.params.lr * 5}
-        #         ], weight_decay=self.params.weight_decay)
-        #     else:
-        #         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=self.params.lr,
-        #                                            weight_decay=self.params.weight_decay)
-        # else:
-        #     if self.params.multi_lr:
-        #         self.optimizer = torch.optim.SGD([
-        #             {'params': backbone_params, 'lr': self.params.lr},
-        #             {'params': other_params, 'lr': self.params.lr * 5}
-        #         ],  momentum=0.9, weight_decay=self.params.weight_decay)
-        #     else:
-        #         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.params.lr, momentum=0.9,
-        #                                          weight_decay=self.params.weight_decay)
 
-        #先分组：mamba/attn/other
         mamba_params = []
         attn_params = []
         other_params = []
@@ -105,7 +86,7 @@ class Trainer(object):
                 if attn_params:
                     param_groups.append({'params': attn_params, 'lr': lr_attn})
                 if mamba_params:
-                    param_groups.append({'params': mamba_params, 'lr': lr_mamba*0.5})
+                    param_groups.append({'params': mamba_params, 'lr': lr_mamba})
                 if other_params:
                     param_groups.append({'params': other_params, 'lr': lr_other * 5})
                 self.optimizer = torch.optim.AdamW(param_groups, weight_decay=self.params.weight_decay)
@@ -118,7 +99,7 @@ class Trainer(object):
                 if attn_params:
                     param_groups.append({'params': attn_params, 'lr': lr_attn})
                 if mamba_params:
-                    param_groups.append({'params': mamba_params, 'lr': lr_mamba*0.5})
+                    param_groups.append({'params': mamba_params, 'lr': lr_mamba})
                 if other_params:
                     param_groups.append({'params': other_params, 'lr': lr_other * 5})
                 self.optimizer = torch.optim.SGD(param_groups, momentum=0.9, weight_decay=self.params.weight_decay)
@@ -247,20 +228,12 @@ class Trainer(object):
             # 保存模型
             if not os.path.isdir(self.params.model_dir):
                 os.makedirs(self.params.model_dir)
-            model_path = self.params.model_dir + "/epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(best_f1_epoch, acc_test, kappa_test, f1_test)
+            time = datetime.now().strftime("%m%d_%H%M%S")
+            model_path = self.params.model_dir +  +"/{}_epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(time,best_f1_epoch, acc_test, kappa_test, f1_test)
             torch.save(self.model.state_dict(), model_path)
             print("model save in " + model_path)
 
-            # 写入summary文件
-            summary_path = os.path.join(self.logger.experiment_dir, "best_and_final_results.txt")
-            with open(summary_path, "w") as f:
-                f.write(f"Best Val Epoch: {best_f1_epoch}\n")
-                f.write(f"Best Val Acc: {acc_best:.5f}, Kappa: {kappa_best:.5f}, F1: {f1_best:.5f}\n")
-                f.write(f"Test Acc: {acc_test:.5f}, Kappa: {kappa_test:.5f}, F1: {f1_test:.5f}\n")
-            self.logger.train_logger.info(f"Best and final results written to {summary_path}")
-
-            # 完成实验日志记录
-            self.logger.finalize_experiment()
+            self.logger.log_multiclass_result(best_f1_epoch, acc_best, kappa_best, f1_best, acc_test, kappa_test, f1_test, cm_test)
 
     def train_for_binaryclass(self):
         acc_best = 0
@@ -331,8 +304,6 @@ class Trainer(object):
                 }
                 self.logger.log_validation_results(epoch + 1, avg_loss, val_metrics)
                 
-                # 记录混淆矩阵
-                self.logger.log_confusion_matrix(cm, class_names=['Class_0', 'Class_1'])
                 if roc_auc > roc_auc_best:
                     print("roc_auc increasing....saving weights !! ")
                     print("Val Evaluation: acc: {:.5f}, pr_auc: {:.5f}, roc_auc: {:.5f}".format(
@@ -340,7 +311,7 @@ class Trainer(object):
                         pr_auc,
                         roc_auc,
                     ))
-                    best_f1_epoch = epoch + 1
+                    best_roc_auc_epoch = epoch + 1
                     acc_best = acc
                     pr_auc_best = pr_auc
                     roc_auc_best = roc_auc
@@ -373,24 +344,16 @@ class Trainer(object):
             self.logger.train_logger.info(f"Test Accuracy: {acc:.5f}")
             self.logger.train_logger.info(f"Test PR AUC: {pr_auc:.5f}")
             self.logger.train_logger.info(f"Test ROC AUC: {roc_auc:.5f}")
-            self.logger.log_confusion_matrix(cm, class_names=['Class_0', 'Class_1'])
-            
-            # 保存模型到原始位置（保持兼容性）
+
+            # 保存模型到原始位置（
             if not os.path.isdir(self.params.model_dir):
                 os.makedirs(self.params.model_dir)
-            model_path = self.params.model_dir + "/epoch{}_acc_{:.5f}_pr_{:.5f}_roc_{:.5f}.pth".format(best_f1_epoch, acc, pr_auc, roc_auc)
+            time = datetime.now().strftime("%m%d_%H%M%S")
+            model_path = self.params.model_dir + "/{}_epoch{}_acc_{:.5f}_pr_{:.5f}_roc_{:.5f}.pth".format(time,best_roc_auc_epoch, acc, pr_auc, roc_auc)
             torch.save(self.model.state_dict(), model_path)
             print("model save in " + model_path)
-            
-            summary_path = os.path.join(self.logger.experiment_dir, "best_and_final_results.txt")
-            with open(summary_path, "w") as f:
-                f.write(f"Best Val Epoch: {best_f1_epoch}\n")
-                f.write(f"Best Val Acc: {acc_best:.5f}, pr_auc: {pr_auc_best:.5f}, roc_auc: {roc_auc_best:.5f}\n")
-                f.write(f"Test Acc: {acc:.5f}, pr_auc: {pr_auc:.5f}, roc_auc: {roc_auc:.5f}\n")
-            self.logger.train_logger.info(f"Best and final results written to {summary_path}")
 
-            # 完成实验日志记录
-            self.logger.finalize_experiment()
+            self.logger.log_binary_class_result(best_roc_auc_epoch, acc_best, pr_auc_best, roc_auc_best, acc, pr_auc, roc_auc, cm, class_names=['Class_0', 'Class_1'])
 
     def train_for_regression(self):
         corrcoef_best = 0
