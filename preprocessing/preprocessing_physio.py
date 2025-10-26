@@ -8,8 +8,8 @@ import mne
 
 tasks = ['04', '06', '08', '10', '12', '14'] # select the data for motor imagery
 
-root_dir = '/data/datasets/eeg-motor-movementimagery-dataset-1.0.0/files'
-files = [file for file in os.listdir(root_dir)]
+root_dir = '../Raw_data/eeg-motor-movementimagery-dataset-1.0.0/'
+files = [file for file in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, file))]
 files = sorted(files)
 
 files_dict = {
@@ -34,8 +34,8 @@ selected_channels = ['Fc5.', 'Fc3.', 'Fc1.', 'Fcz.', 'Fc2.', 'Fc4.', 'Fc6.', 'C5
                      'F6..', 'F8..', 'Ft7.', 'Ft8.', 'T7..', 'T8..', 'T9..', 'T10.', 'Tp7.', 'Tp8.', 'P7..', 'P5..',
                      'P3..', 'P1..', 'Pz..', 'P2..', 'P4..', 'P6..', 'P8..', 'Po7.', 'Po3.', 'Poz.', 'Po4.', 'Po8.',
                      'O1..', 'Oz..', 'O2..', 'Iz..']
-
-db = lmdb.open('/data/datasets/eeg-motor-movementimagery-dataset-1.0.0/processed_average', map_size=4614542346)
+os.makedirs('../data/eeg-motor-movementimagery-dataset-1.0.0', exist_ok=True)
+db = lmdb.open('../data/eeg-motor-movementimagery-dataset-1.0.0/processed_average', map_size=4614542346)
 
 for files_key in files_dict.keys():
     for file in files_dict[files_key]:

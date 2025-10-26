@@ -229,11 +229,11 @@ class Trainer(object):
             if not os.path.isdir(self.params.model_dir):
                 os.makedirs(self.params.model_dir)
             time = datetime.now().strftime("%m%d_%H%M%S")
-            model_path = self.params.model_dir +  +"/{}_epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(time,best_f1_epoch, acc_test, kappa_test, f1_test)
+            model_path = self.params.model_dir + "/{}_epoch{}_acc_{:.5f}_kappa_{:.5f}_f1_{:.5f}.pth".format(time,best_f1_epoch, acc_test, kappa_test, f1_test)
             torch.save(self.model.state_dict(), model_path)
             print("model save in " + model_path)
 
-            self.logger.log_multiclass_result(best_f1_epoch, acc_best, kappa_best, f1_best, acc_test, kappa_test, f1_test, cm_test)
+            self.logger.log_multi_class_result(best_f1_epoch, acc_best, kappa_best, f1_best, acc_test, kappa_test, f1_test, cm_test)
 
     def train_for_binaryclass(self):
         acc_best = 0

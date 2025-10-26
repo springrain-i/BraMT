@@ -53,20 +53,15 @@ class MambaVisionMixer(nn.Module):
         self.use_fast_path = use_fast_path
         self.layer_idx = layer_idx
         
-        self.in_proj = nn.Linear(self.d_model, self.d_inner * 2, bias=bias, **factory_kwargs)
-        self.conv1d = nn.Conv1d(
-            in_channels=self.d_inner,
-            out_channels=self.d_inner,
-            bias=conv_bias,
-            kernel_size=d_conv,
-            groups=self.d_inner,
-            padding=d_conv - 1,
-            **factory_kwargs,
-        )
+        # 将输入的特征投影维度扩大，用于分支
+        self.in_proj = nn.Linear(self.d_model, self.d_inner, bias=bias, **factory_kwargs)
+        # SSM分支: 获取B, C, dt
         self.x_proj = nn.Linear(
-            self.d_inner, self.dt_rank + self.d_state * 2, bias=False, **factory_kwargs
+            self.d_inner//2, self.dt_rank + self.d_state * 2, bias=False, **factory_kwargs
         )
-        self.dt_proj = nn.Linear(self.dt_rank, self.d_inner, bias=True, **factory_kwargs)
+        # 
+        self.dt_proj = nn.Linear(self.dt_rank, self.d_inner//2, bias=True, **factory_kwargs)
+        
 
         dt_init_std = self.dt_rank**-0.5 * dt_scale
         if dt_init == "constant":
@@ -77,7 +72,7 @@ class MambaVisionMixer(nn.Module):
             raise NotImplementedError
 
         dt = torch.exp(
-            torch.rand(self.d_inner, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
+            torch.rand(self.d_inner//2, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
             + math.log(dt_min)
         ).clamp(min=dt_init_floor)
         inv_dt = dt + torch.log(-torch.expm1(-dt))
@@ -88,70 +83,88 @@ class MambaVisionMixer(nn.Module):
         A = repeat(
             torch.arange(1, self.d_state + 1, dtype=torch.float32, device=device),
             "n -> d n",
-            d=self.d_inner,
+            d=self.d_inner//2,
         ).contiguous()
         A_log = torch.log(A)
         self.A_log = nn.Parameter(A_log)
         self.A_log._no_weight_decay = True
 
-        self.D = nn.Parameter(torch.ones(self.d_inner, device=device))
+        self.D = nn.Parameter(torch.ones(self.d_inner//2, device=device))
         self.D._no_weight_decay = True
 
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
+        # 使用两个卷积分别处理x和z，不共享权重
+        self.conv1d_x = nn.Conv1d(
+            in_channels=self.d_inner//2,
+            out_channels=self.d_inner//2,
+            bias=conv_bias,
+            kernel_size=d_conv,
+            groups=self.d_inner//2,
+            **factory_kwargs,
+        )
+        self.conv1d_z = nn.Conv1d(
+            in_channels=self.d_inner//2,
+            out_channels=self.d_inner//2,
+            bias=conv_bias,
+            kernel_size=d_conv,
+            groups=self.d_inner//2,
+            **factory_kwargs,
+        )
+    # def forward(self, hidden_states):
+    #     """处理序列格式的输入"""
+    #     B, L, D = hidden_states.shape
+    #     x_and_res = self.in_proj(hidden_states)
+    #     x, res = x_and_res.split([self.d_inner, self.d_inner], dim=-1)
+
+    #     x = rearrange(x, "b l d -> b d l")
+    #     x = self.conv1d(x)[:, :, :L]
+    #     x = rearrange(x, "b d l -> b l d")
+
+    #     x = F.silu(x)
+
+    #     y = self.ssm(x)
+
+    #     y = y * F.silu(res)
+
+    #     out = self.out_proj(y)
+    #     return out   门控机制得到的输出，原本mamba的方式
 
     def forward(self, hidden_states):
-        # 处理4D输入 (batch, channels, patches, features)
-        if hidden_states.dim() == 4:
-            bz, ch_num, patch_num, d_model = hidden_states.shape
-            # Reshape为序列格式: (batch, seq_len, d_model)
-            hidden_states = hidden_states.view(bz, ch_num * patch_num, d_model)
-            output = self._forward_sequence(hidden_states)
-            # Reshape回原始格式
-            return output.view(bz, ch_num, patch_num, d_model)
-        else:
-            return self._forward_sequence(hidden_states)
-    
-    def _forward_sequence(self, hidden_states):
-        """处理序列格式的输入"""
         B, L, D = hidden_states.shape
-        x_and_res = self.in_proj(hidden_states)
-        x, res = x_and_res.split([self.d_inner, self.d_inner], dim=-1)
+        x_z = self.in_proj(hidden_states)
+        x_z = rearrange(x_z, "b l d -> b d l")
+        x, z = x_z.chunk(2, dim=1)
+        x = F.silu(F.conv1d(input=x, weight=self.conv1d_x.weight, bias=self.conv1d_x.bias, padding='same', groups=self.d_inner//2))
+        z = F.silu(F.conv1d(input=z, weight=self.conv1d_z.weight, bias=self.conv1d_z.bias, padding='same', groups=self.d_inner//2))
 
-        x = rearrange(x, "b l d -> b d l")
-        x = self.conv1d(x)[:, :, :L]
-        x = rearrange(x, "b d l -> b l d")
+        y = self.ssm(x, L)
 
-        x = F.silu(x)
-
-        y = self.ssm(x)
-
-        y = y * F.silu(res)
-
+        y = torch.cat([y, z], dim=1)
+        y = rearrange(y, "b d l -> b l d")
         out = self.out_proj(y)
         return out
 
-    def ssm(self, x):
-        D = self.D.float()
+    def ssm(self, x, L):
         A = -torch.exp(self.A_log.float())
-        dt, B, C = torch.split(self.x_proj(x), [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        
-        dt = torch.einsum('bld,nd->bnl', dt, self.dt_proj.weight)
-        
-        B = rearrange(B, "b l d -> b d l")
-        C = rearrange(C, "b l d -> b d l")
-        
-        y = selective_scan_fn(x.transpose(1,2), 
+        x_dbl = self.x_proj(rearrange(x,"b d l -> (b l) d"))
+        D = self.D.float()
+        dt, B, C = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=-1)
+        dt = rearrange(self.dt_proj(dt), "(b l) d -> b d l", l=L)
+
+        B = rearrange(B, "(b l) dstate -> b dstate l", l=L).contiguous()
+        C = rearrange(C, "(b l) dstate -> b dstate l", l=L).contiguous()
+        y = selective_scan_fn(x, 
                               dt, 
                               A, 
                               B, 
                               C, 
-                              D, 
+                              self.D.float(), 
                               z=None, 
                               delta_bias=self.dt_proj.bias.float(), 
                               delta_softplus=True, 
-                              return_last_state=False)
+                              return_last_state=None)
         
-        return y.transpose(1,2)
+        return y
 
 
 class HybridEncoderLayer(nn.Module):
@@ -160,7 +173,7 @@ class HybridEncoderLayer(nn.Module):
     def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
                  activation: Union[str, Callable[[Tensor], Tensor]] = F.gelu,
                  layer_norm_eps: float = 1e-5, batch_first: bool = True, norm_first: bool = True,
-                 bias: bool = True, use_mamba: bool = False, 
+                 bias: bool = True, use_mamba: bool = False, axis_order: bool = True,
                  # Mamba specific parameters
                  d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True,
                  device=None, dtype=None) -> None:
@@ -168,16 +181,31 @@ class HybridEncoderLayer(nn.Module):
         super().__init__()
         
         self.use_mamba = use_mamba
-        
+        self.axis_order = axis_order
         if use_mamba:
             # 使用Mamba mixer
             print(f"Building MambaVisionMixer with d_model={d_model}, d_state={d_state}, d_conv={d_conv}, expand={expand}")
+            if axis_order:
+                print("*****use axis_order*****")
+                self.in_project = nn.Linear(d_model, d_model*2, bias=bias, **factory_kwargs)
+                self.out_project = nn.Linear(d_model*2,d_model, bias=bias, **factory_kwargs)
+                self.mixer_time_ch = MambaVisionMixer(
+                    d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
+                    conv_bias=conv_bias, bias=bias,
+                    device=device, dtype=dtype
+                )
+                self.mixer_ch_time = MambaVisionMixer(
+                    d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
+                    conv_bias=conv_bias, bias=bias,
+                    device=device, dtype=dtype
+                )
+            else:
+                self.mixer = MambaVisionMixer(
+                    d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
+                    conv_bias=conv_bias, bias=bias,
+                    device=device, dtype=dtype
+                )
 
-            self.mixer = MambaVisionMixer(
-                d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
-                conv_bias=conv_bias, bias=bias,
-                device=device, dtype=dtype
-            )
         else:
             # 使用标准的多头自注意力
             print(f"Building MultiheadAttention with d_model={d_model}, nhead={nhead}")
@@ -220,25 +248,41 @@ class HybridEncoderLayer(nn.Module):
 
     def _mixer_block(self, x: Tensor, attn_mask: Optional[Tensor]) -> Tensor:
         """Mixer block - 可以是Attention或Mamba"""
+        bz, ch_num, patch_num, d_model = x.shape
+
+
         if self.use_mamba:
             # Mamba处理
-            mixer_output = self.mixer(x)            #后边再调
-            return self.dropout1(mixer_output)
+            if self.axis_order: # 考虑不同的顺序影响
+                x = self.in_project(x)
+                #print(x.shape)
+                x_time_ch = x[:,:,:,:d_model]
+                x_ch_time = x[:,:,:,d_model:]
+
+                x_time_ch = x_time_ch.contiguous().view(bz, ch_num*patch_num,d_model)
+                x_ch_time = x_ch_time.contiguous().view(bz*patch_num, ch_num, d_model)
+
+                output_time_ch = self.mixer_time_ch(x_time_ch)
+                output_ch_time = self.mixer_ch_time(x_ch_time)
+
+                output_time_ch = output_time_ch.contiguous().view(bz, ch_num, patch_num, d_model)
+                output_ch_time = output_ch_time.contiguous().view(bz, ch_num, patch_num, d_model)
+                output = torch.concat((output_time_ch,output_ch_time),dim=3)
+
+                output = self.out_project(output)
+            else:
+                x_reshaped = x.contiguous().view(bz, ch_num * patch_num, d_model)
+                output = self.mixer(x_reshaped)            
+                output = output.contiguous().view(bz, ch_num, patch_num, d_model)
         else:
-            # Attention处理4D输入
-            bz, ch_num, patch_num, d_model = x.shape
-            
-            # Reshape为序列格式: (batch, seq_len, d_model)
-            x_reshaped = x.view(bz, ch_num * patch_num, d_model)
-            
             # 标准自注意力
-            attn_output, _ = self.mixer(x_reshaped, x_reshaped, x_reshaped,
+            x_reshaped = x.view(bz, ch_num * patch_num, d_model)
+            output, _ = self.mixer(x_reshaped, x_reshaped, x_reshaped,
                                       attn_mask=attn_mask, need_weights=False)
-            
-            # Reshape回原始格式
-            attn_output = attn_output.view(bz, ch_num, patch_num, d_model)
-            
-            return self.dropout1(attn_output)
+            output = output.contiguous().view(bz, ch_num, patch_num, d_model)
+
+
+        return self.dropout1(output)
 
     def _ff_block(self, x: Tensor) -> Tensor:
         """Feed forward block"""
