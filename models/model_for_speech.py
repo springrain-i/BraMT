@@ -16,6 +16,7 @@ class Model(nn.Module):
             # Mamba specific parameters
             depths=[int(x) for x in param.depths.split(',')],
             stage_types=[x for x in param.stage_types.split(',')],
+            axis_order= param.axis_order, mamba_global= param.mamba_global,
             d_state= param.d_state, d_conv=param.d_conv, expand=param.expand, conv_bias=param.conv_bias
         )
         if param.use_pretrained_weights:

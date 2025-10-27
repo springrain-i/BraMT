@@ -9,7 +9,7 @@ class BraMT(nn.Module):
     def __init__(self, in_dim=200, out_dim=200, d_model=200, dim_feedforward=800, seq_len=30, n_layer=12,nhead=8,
                     activation=F.gelu, layer_norm_eps=1e-5, batch_first=True, norm_first=True, bias=True,
                     # Mamba specific parameters
-                    depths=[6,6],stage_types=['mamba','attn'],
+                    depths=[6,6],stage_types=['mamba','attn'],axis_order: bool = True,mamba_global: bool = True,
                     d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True
                     ):
         super().__init__()
@@ -47,6 +47,8 @@ class BraMT(nn.Module):
             # Mamba specific parameters
             depths=depths,
             stage_types=stage_types,
+            axis_order=axis_order,
+            mamba_global=mamba_global,
             conv_bias=conv_bias,
             d_state=d_state,
             d_conv=d_conv,

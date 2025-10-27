@@ -61,7 +61,6 @@ class MambaVisionMixer(nn.Module):
         )
         # 
         self.dt_proj = nn.Linear(self.dt_rank, self.d_inner//2, bias=True, **factory_kwargs)
-        
 
         dt_init_std = self.dt_rank**-0.5 * dt_scale
         if dt_init == "constant":
@@ -173,7 +172,7 @@ class HybridEncoderLayer(nn.Module):
     def __init__(self, d_model: int, nhead: int, dim_feedforward: int = 2048, dropout: float = 0.1,
                  activation: Union[str, Callable[[Tensor], Tensor]] = F.gelu,
                  layer_norm_eps: float = 1e-5, batch_first: bool = True, norm_first: bool = True,
-                 bias: bool = True, use_mamba: bool = False, axis_order: bool = True,
+                 bias: bool = True, use_mamba: bool = False, axis_order: bool = True, mamba_global: bool = True,
                  # Mamba specific parameters
                  d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True,
                  device=None, dtype=None) -> None:
@@ -182,6 +181,7 @@ class HybridEncoderLayer(nn.Module):
         
         self.use_mamba = use_mamba
         self.axis_order = axis_order
+        self.mamba_global = mamba_global
         if use_mamba:
             # 使用Mamba mixer
             print(f"Building MambaVisionMixer with d_model={d_model}, d_state={d_state}, d_conv={d_conv}, expand={expand}")
@@ -199,6 +199,22 @@ class HybridEncoderLayer(nn.Module):
                     conv_bias=conv_bias, bias=bias,
                     device=device, dtype=dtype
                 )
+
+                if self.mamba_global:
+                    print("*****use mamba_global*****")
+                    self.mixer = MambaVisionMixer(
+                        d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
+                        conv_bias=conv_bias, bias=bias,
+                        device=device, dtype=dtype
+                    )
+                    # self.fusion_gate = nn.Sequential(
+                    #     nn.Linear(d_model * 2, d_model // 4),  # 输入是拼接的局部和全局特征
+                    #     nn.ReLU(),
+                    #     nn.Linear(d_model // 4, 1),  # 输出单个门控值
+                    #     nn.Sigmoid()  # 压到[0,1]
+                    # )
+                    self.fuse_glu = nn.Linear(2 * d_model, 2 * d_model, bias=True)
+                    self.fuse_out = nn.Linear(d_model, d_model, bias=True)  
             else:
                 self.mixer = MambaVisionMixer(
                     d_model=d_model, d_state=d_state, d_conv=d_conv, expand=expand,
@@ -254,22 +270,42 @@ class HybridEncoderLayer(nn.Module):
         if self.use_mamba:
             # Mamba处理
             if self.axis_order: # 考虑不同的顺序影响
-                x = self.in_project(x)
+                x_local = self.in_project(x)
+                hidden_model = x_local.shape[3] // 2  #无论使用拓展二倍，分割时都是一半
                 #print(x.shape)
-                x_time_ch = x[:,:,:,:d_model]
-                x_ch_time = x[:,:,:,d_model:]
+                x_time_ch = x_local[:,:,:,:hidden_model]
+                x_ch_time = x_local[:,:,:,hidden_model:]
 
-                x_time_ch = x_time_ch.contiguous().view(bz, ch_num*patch_num,d_model)
-                x_ch_time = x_ch_time.contiguous().view(bz*patch_num, ch_num, d_model)
+                x_time_ch = x_time_ch.contiguous().view(bz*ch_num, patch_num,hidden_model)
+                x_ch_time = x_ch_time.contiguous().view(bz*patch_num, ch_num, hidden_model)
 
                 output_time_ch = self.mixer_time_ch(x_time_ch)
                 output_ch_time = self.mixer_ch_time(x_ch_time)
 
-                output_time_ch = output_time_ch.contiguous().view(bz, ch_num, patch_num, d_model)
-                output_ch_time = output_ch_time.contiguous().view(bz, ch_num, patch_num, d_model)
-                output = torch.concat((output_time_ch,output_ch_time),dim=3)
+                output_time_ch = output_time_ch.contiguous().view(bz, ch_num, patch_num, hidden_model)
+                output_ch_time = output_ch_time.contiguous().view(bz, ch_num, patch_num, hidden_model)
+                output_local = torch.concat((output_time_ch,output_ch_time),dim=3)
 
-                output = self.out_project(output)
+                output_local = self.out_project(output_local)
+
+                if self.mamba_global:
+                    x_global = x.contiguous().view(bz, ch_num*patch_num, d_model)
+                    output_global = self.mixer(x_global)
+                    output_global = output_global.contiguous().view(bz, ch_num, patch_num, d_model)
+
+                    # global和local在每个维度的语义是不一致的，直接使用门控融合效果不佳
+                    # gate = self.fusion_gate(torch.concat((output_global,output_local),dim=3))
+                    # output = gate * output_local + (1 - gate) * output_global
+
+                    # 尝试分别归一化，再用GLU      Concat + GLU（门控线性，表达力更强）
+                    y_local  = F.layer_norm(output_local, (d_model,), eps=1e-5)
+                    y_global = F.layer_norm(output_global, (d_model,), eps=1e-5)
+                    cat = torch.cat([y_local, y_global], dim=3)          # [B,C,P,2D]
+                    h, g = torch.split(self.fuse_glu(cat), d_model, dim=3)              # [B,C,P,D], [B,C,P,D]
+                    fused = h * torch.sigmoid(g)                          # [B,C,P,D]
+                    output = self.fuse_out(fused)                         # 可选线性精调
+                else:
+                    output = output_local
             else:
                 x_reshaped = x.contiguous().view(bz, ch_num * patch_num, d_model)
                 output = self.mixer(x_reshaped)            
@@ -306,6 +342,7 @@ class HybridEncoder(nn.Module):
                  layer_norm_eps: float = 1e-5, batch_first: bool = True, norm_first: bool = True,
                  bias: bool = True, 
                  # Mamba specific parameters
+                 axis_order: bool = True, mamba_global: bool = True,
                  d_state: int = 16, d_conv: int = 4, expand: int = 2, conv_bias: bool = True,
                  device=None, dtype=None) -> None:
         super().__init__()
@@ -324,7 +361,8 @@ class HybridEncoder(nn.Module):
                         batch_first=True, norm_first=True,
                         activation=F.gelu,
                         # Mamba specific parameters
-                        use_mamba= (layer_type == "mamba"), d_state=d_state, d_conv=d_conv, expand=expand, conv_bias=conv_bias
+                        use_mamba= (layer_type == "mamba"), axis_order= axis_order,mamba_global= mamba_global,
+                        d_state=d_state, d_conv=d_conv, expand=expand, conv_bias=conv_bias
                     )
                 )
 

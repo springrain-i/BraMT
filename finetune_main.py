@@ -12,6 +12,22 @@ from models import model_for_faced, model_for_seedv, model_for_physio, model_for
     model_for_bciciv2a
 
 
+def str2bool(v):
+    """Robust boolean parser for argparse.
+    Accepts: true/false, t/f, yes/no, y/n, 1/0 (case-insensitive).
+    """
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return None
+    v = str(v).strip().lower()
+    if v in ("true", "t", "yes", "y", "1"):  # truthy
+        return True
+    if v in ("false", "f", "no", "n", "0"):  # falsy
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value: {v}")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Big model downstream')
     parser.add_argument('--seed', type=int, default=0, help='random seed (default: 0)')
@@ -47,11 +63,11 @@ def main():
 
     parser.add_argument('--num_workers', type=int, default=16, help='num_workers')
     parser.add_argument('--label_smoothing', type=float, default=0.1, help='label_smoothing')
-    parser.add_argument('--multi_lr', type=bool, default=True,
+    parser.add_argument('--multi_lr', type=str2bool, default=True,
                         help='multi_lr')  # set different learning rates for different modules
-    parser.add_argument('--frozen', type=bool,
+    parser.add_argument('--frozen', type=str2bool,
                         default=False, help='frozen')
-    parser.add_argument('--use_pretrained_weights', type=bool,
+    parser.add_argument('--use_pretrained_weights', type=str2bool,
                         default=None, help='use_pretrained_weights')       #不使用
     parser.add_argument('--foundation_dir', type=str,
                         default='pretrained_weights/pretrained_weights.pth',
@@ -61,10 +77,14 @@ def main():
     """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
     parser.add_argument('--depths', type=str, default='6,6', help='depths')
+    parser.add_argument('--axis_order', type=str2bool, default=True, help='' \
+    'multi mamba sequence (criss,ease,both)-(cat,gate,add) ')
+    parser.add_argument('--mamba_global', type=str2bool, default=True, help='' \
+    'whether to use global context in Mamba')
     parser.add_argument('--d_state', type=int, default=16, help='d_state for Mamba')
     parser.add_argument('--d_conv', type=int, default=4, help='d_conv for Mamba')
     parser.add_argument('--expand', type=int, default=2, help='expand for Mamba')
-    parser.add_argument('--conv_bias', type=bool, default=True, help='conv_bias for Mamba')
+    parser.add_argument('--conv_bias', type=str2bool, default=True, help='conv_bias for Mamba')
 
 
     params = parser.parse_args()
