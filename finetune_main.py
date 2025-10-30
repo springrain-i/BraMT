@@ -86,7 +86,8 @@ def main():
     parser.add_argument('--expand', type=int, default=2, help='expand for Mamba')
     parser.add_argument('--conv_bias', type=str2bool, default=True, help='conv_bias for Mamba')
 
-
+    """"############ save out settings ############"""
+    parser.add_argument('--log_dir',type=str,default='./logs',help='the destination of log')
     params = parser.parse_args()
     print(params)
 

@@ -22,7 +22,7 @@ class Trainer(object):
         
         # 生成包含架构信息的实验名称
         experiment_name = self._generate_experiment_name(params, model)
-        self.logger = ModelLogger(log_dir="logs", params=params, experiment_name=experiment_name)
+        self.logger = ModelLogger(params=params, experiment_name=experiment_name)
         
         # 记录实验配置
         config_dict = vars(params) if hasattr(params, '__dict__') else params

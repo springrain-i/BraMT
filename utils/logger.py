@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class ModelLogger:
-    def __init__(self, log_dir="logs", params=None, experiment_name=None,
+    def __init__(self,params=None, experiment_name=None,
                  monitor_key: str = 'acc', monitor_mode: str = 'max'):
         """
         初始化模型日志记录器
@@ -19,13 +19,14 @@ class ModelLogger:
             monitor_key: 验证集用于挑选最佳 epoch 的指标名称，例如 'acc' / 'roc_auc'
             monitor_mode: 'max' 或 'min'，用于决定该指标是越大越好还是越小越好
         """
-        self.log_dir = log_dir
         self.params = params
+        self.log_dir = params.log_dir
+        os.makedirs(self.log_dir,exist_ok=True)
         if experiment_name is None:
             experiment_name = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         self.experiment_name = experiment_name
-        self.experiment_dir = os.path.join(log_dir, experiment_name)
+        self.experiment_dir = os.path.join(self.log_dir, experiment_name)
         
         # 创建日志目录
         os.makedirs(self.experiment_dir, exist_ok=True)

@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn import functional as F
 from timm.layers import DropPath, trunc_normal_
-from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
+from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 from einops import rearrange, repeat
 from einops.layers.torch import Rearrange
 
