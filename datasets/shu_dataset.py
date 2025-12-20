@@ -27,6 +27,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         key = self.keys[idx]
+        print(np.__version__)
         with self.db.begin(write=False) as txn:
             pair = pickle.loads(txn.get(key.encode()))
         data = pair['sample']

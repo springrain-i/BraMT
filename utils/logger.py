@@ -84,6 +84,8 @@ class ModelLogger:
 
         # 顶层子模块参数统计（按照参数名前缀的第一段分组,例如patch_embedding, encoder, project_out,classifier）
         top_level_counts = {}
+        for name, param in model.named_parameters():
+            print(name, param.shape)
         for name, p in model.named_parameters():
             top = name.split('.')[0]
             top_level_counts.setdefault(top, 0)
@@ -104,6 +106,12 @@ class ModelLogger:
         for name, p in model.named_parameters():
             if name.split('.')[1] == 'encoder':
                 layer_idx = int(name.split('.')[3])
+                stage_type = stage_types[locate_stage(depths,layer_idx)]
+                layer_level_counts.setdefault(stage_type,0)
+                layer_level_counts[stage_type] += p.numel()
+                layer_total_params += p.numel()
+            elif name.split('.')[0] == 'encoder':
+                layer_idx = int(name.split('.')[2])
                 stage_type = stage_types[locate_stage(depths,layer_idx)]
                 layer_level_counts.setdefault(stage_type,0)
                 layer_level_counts[stage_type] += p.numel()
