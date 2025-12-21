@@ -11,6 +11,13 @@ from datetime import datetime
 from utils.util import generate_mask
 from utils.logger import ModelLogger
 
+# Optional: Weights & Biases integration
+try:
+    import wandb
+    _WANDB_AVAILABLE = True
+except Exception:
+    _WANDB_AVAILABLE = False
+
 
 class Trainer(object):
     def __init__(self, params, data_loader, model):
@@ -30,6 +37,27 @@ class Trainer(object):
         config_dict = vars(params) if hasattr(params, '__dict__') else params
         self.logger.log_experiment_config(config_dict)
         self.logger.log_model_architecture(model)
+
+        # initialize wandb if enabled and available
+        self.wandb_run = None
+        self.wandb_enabled = bool(getattr(self.params, 'use_wandb', False)) and _WANDB_AVAILABLE and getattr(self.params, 'wandb_mode', 'online') != 'disabled'
+        if self.wandb_enabled:
+            try:
+                wandb_kwargs = dict(
+                    project=getattr(self.params, 'wandb_project', 'eeg-pretrain'),
+                    name=experiment_name,
+                    mode=getattr(self.params, 'wandb_mode', 'online'),
+                    dir=getattr(self.params, 'wandb_dir', './wandb'),
+                    config=config_dict,
+                )
+                entity = getattr(self.params, 'wandb_entity', None)
+                if entity:
+                    wandb_kwargs['entity'] = entity
+                self.wandb_run = wandb.init(**wandb_kwargs)
+                wandb.watch(self.model, log='gradients', log_freq=100)
+            except Exception:
+                self.wandb_run = None
+                self.wandb_enabled = False
   
 
         if self.params.parallel:
@@ -103,6 +131,15 @@ class Trainer(object):
                 self.optimizer.step()
                 self.optimizer_scheduler.step()
                 losses.append(loss.data.cpu().numpy())
+
+                # step-level wandb logging
+                if self.wandb_enabled:
+                    try:
+                        current_lr = self.optimizer.state_dict()['param_groups'][0]['lr']
+                        global_step = (self.data_length * epoch) + step
+                        wandb.log({'loss': float(loss.item()), 'lr': float(current_lr), 'epoch': epoch + 1, 'step': global_step})
+                    except Exception:
+                        pass
             mean_loss = np.mean(losses)
             learning_rate = self.optimizer.state_dict()['param_groups'][0]['lr']
             elapsed_mins = (timer() - start_time) / 60
@@ -120,6 +157,13 @@ class Trainer(object):
             except Exception:
                 pass
 
+            # epoch-level wandb logging
+            if self.wandb_enabled:
+                try:
+                    wandb.log({'epoch_mean_loss': float(mean_loss), 'lr': float(learning_rate), 'epoch': epoch + 1})
+                except Exception:
+                    pass
+
             # save best model
             if mean_loss < best_loss:
                 if not os.path.isdir(self.params.model_dir):
@@ -133,8 +177,22 @@ class Trainer(object):
 
                 best_loss = mean_loss
 
+                # wandb best metric
+                if self.wandb_enabled:
+                    try:
+                        wandb.log({'best_loss': float(best_loss), 'best_epoch': epoch + 1})
+                    except Exception:
+                        pass
+
         # at end of training, optionally log final model path
 
             final_model_path = os.path.join(self.params.model_dir, f'final_pretrained_epoch{self.params.epochs}_loss{best_loss:.6f}.pth')
             torch.save(self.model.state_dict(), final_model_path)
             self.logger.train_logger.info(f"Final pretrain model saved to {final_model_path}")
+
+        # finish wandb run at the end of training
+        if self.wandb_enabled:
+            try:
+                wandb.finish()
+            except Exception:
+                pass

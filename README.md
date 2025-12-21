@@ -4,7 +4,7 @@
 Commit 分为“标题”和“内容”。原则上标题全部小写。内容首字母大写。
 
 ### 标题
-`<type>](<scope>) <subject> (#pr)`
+`[<type>](<scope>) <subject> (#pr)`
   
 `<type>`:
 本次提交的类型，暂时限定在以下类型

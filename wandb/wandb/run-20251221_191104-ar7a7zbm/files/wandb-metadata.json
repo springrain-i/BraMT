@@ -1,0 +1,57 @@
+{
+  "os":  "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python":  "CPython 3.12.8",
+  "startedAt":  "2025-12-21T11:11:04.513005Z",
+  "args":  [
+    "--epochs",
+    "5",
+    "--batch_size",
+    "64",
+    "--lr",
+    "5e-4",
+    "--dataset_dir",
+    "data_for_pretrain/Faced/processed",
+    "--model_dir",
+    "model_dir/pretrained_faced_model",
+    "--mamba_global",
+    "False",
+    "--depths",
+    "1,1",
+    "--stage_types",
+    "mamba,attn"
+  ],
+  "program":  "/home/springrain-i/BaseLine/pretrain_main.py",
+  "codePath":  "pretrain_main.py",
+  "codePathLocal":  "pretrain_main.py",
+  "git":  {
+    "remote":  "git@github.com:springrain-i/BraMT.git",
+    "commit":  "17d1af0d8ba2fcc89fb4871b18a24f63376066a1"
+  },
+  "email":  "1421816607@qq.com",
+  "root":  "./wandb",
+  "host":  "qixu",
+  "executable":  "/home/springrain-i/BaseLine/venv/bin/python",
+  "cpu_count":  10,
+  "cpu_count_logical":  20,
+  "gpu":  "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "1081101176832",
+      "used":  "137322156032"
+    }
+  },
+  "memory":  {
+    "total":  "8182214656"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "memoryTotal":  "8585740288",
+      "architecture":  "Ada",
+      "uuid":  "GPU-5b27cb50-3240-f7c3-d0d7-a8b590753c2f"
+    }
+  ],
+  "cudaVersion":  "13.1",
+  "writerId":  "1ytkhecum32g7uksqeuoffc0o9fhecbu"
+}

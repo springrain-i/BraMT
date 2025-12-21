@@ -49,6 +49,13 @@ def main():
     parser.add_argument('--model_dir',   type=str,   default='model_dir', help='model_dir')
     parser.add_argument('--log_dir', type=str, default='./logs', help='the destination of log')
 
+    # wandb logging settings
+    parser.add_argument('--use_wandb', type=bool, default=True, help='enable Weights & Biases logging')
+    parser.add_argument('--wandb_project', type=str, default='eeg-pretrain', help='wandb project name')
+    parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity/org (optional)')
+    parser.add_argument('--wandb_mode', type=str, default='online', help='wandb mode: online/offline/disabled')
+    parser.add_argument('--wandb_dir', type=str, default='./wandb', help='local dir to store wandb files')
+
     """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
     parser.add_argument('--depths', type=str, default='6,6', help='depths')
