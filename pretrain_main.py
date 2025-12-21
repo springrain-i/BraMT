@@ -55,6 +55,7 @@ def main():
     parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity/org (optional)')
     parser.add_argument('--wandb_mode', type=str, default='online', help='wandb mode: online/offline/disabled')
     parser.add_argument('--wandb_dir', type=str, default='./wandb', help='local dir to store wandb files')
+    parser.add_argument('--wandb_api_key', type=str, default="800a257e9949b9633a2fd6bfda872cb92089b27c", help='wandb API key (optional, for programmatic login)')
 
     """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')

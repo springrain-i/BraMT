@@ -43,6 +43,14 @@ class Trainer(object):
         self.wandb_enabled = bool(getattr(self.params, 'use_wandb', False)) and _WANDB_AVAILABLE and getattr(self.params, 'wandb_mode', 'online') != 'disabled'
         if self.wandb_enabled:
             try:
+                # optional programmatic login if key provided
+                api_key = getattr(self.params, 'wandb_api_key', None)
+                if api_key:
+                    os.environ["WANDB_API_KEY"] = str(api_key)
+                    try:
+                        wandb.login(key=str(api_key), relogin=True)
+                    except Exception:
+                        pass
                 wandb_kwargs = dict(
                     project=getattr(self.params, 'wandb_project', 'eeg-pretrain'),
                     name=experiment_name,
