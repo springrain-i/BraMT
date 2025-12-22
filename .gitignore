@@ -9,13 +9,14 @@ model_dir/
 tmp.*
 base_info.txt
 logs/
+wandb/
+
 
 # 数据集相关
 data_for_pretrain/
 data/
 Raw_data/
-*.lmdb
-*.db
+*.mdb
 
 # 汇报相关
 report/
