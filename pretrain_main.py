@@ -16,6 +16,20 @@ def setup_seed(seed):
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
 
+def str2bool(v):
+    """Robust boolean parser for argparse.
+    Accepts: true/false, t/f, yes/no, y/n, 1/0 (case-insensitive).
+    """
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return None
+    v = str(v).strip().lower()
+    if v in ("true", "t", "yes", "y", "1"):  # truthy
+        return True
+    if v in ("false", "f", "no", "n", "0"):  # falsy
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value: {v}")
 
 def main():
     parser = argparse.ArgumentParser(description='EEG Foundation Model')
@@ -60,13 +74,13 @@ def main():
     """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
     parser.add_argument('--depths', type=str, default='6,6', help='depths')
-    parser.add_argument('--axis_order', type=bool, default=True, help='')
-    parser.add_argument('--mamba_global', type=bool, default=True, help='' \
+    parser.add_argument('--axis_order', type=str2bool, default=True, help='')
+    parser.add_argument('--mamba_global', type=str2bool, default=False, help='' \
     'whether to use global context in Mamba')
     parser.add_argument('--d_state', type=int, default=16, help='d_state for Mamba')
     parser.add_argument('--d_conv', type=int, default=4, help='d_conv for Mamba')
     parser.add_argument('--expand', type=int, default=2, help='expand for Mamba')
-    parser.add_argument('--conv_bias', type=bool, default=True, help='conv_bias for Mamba')
+    parser.add_argument('--conv_bias', type=str2bool, default=True, help='conv_bias for Mamba')
     params = parser.parse_args()
     print(params)
     setup_seed(params.seed)

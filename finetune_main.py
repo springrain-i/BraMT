@@ -79,7 +79,7 @@ def main():
     parser.add_argument('--depths', type=str, default='6,6', help='depths')
     parser.add_argument('--axis_order', type=str2bool, default=True, help='' \
     'multi mamba sequence (criss,ease,both)-(cat,gate,add) ')
-    parser.add_argument('--mamba_global', type=str2bool, default=True, help='' \
+    parser.add_argument('--mamba_global', type=str2bool, default=False, help='' \
     'whether to use global context in Mamba')
     parser.add_argument('--d_state', type=int, default=16, help='d_state for Mamba')
     parser.add_argument('--d_conv', type=int, default=4, help='d_conv for Mamba')
