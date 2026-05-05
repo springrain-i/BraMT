@@ -22,7 +22,11 @@ class Model(nn.Module):
 
         if param.use_pretrained_weights:
             map_location = torch.device(f'cuda:{param.cuda}')
-            self.backbone.load_state_dict(torch.load(param.foundation_dir, map_location=map_location))
+            # 加载权重并自动去除 module. 前缀
+            state_dict = torch.load(param.foundation_dir, map_location=map_location)
+            # 去除 DataParallel 保存的 module. 前缀
+            new_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+            self.backbone.load_state_dict(new_state_dict)
         self.backbone.proj_out = nn.Identity()
 
         if param.classifier == 'avgpooling_patch_reps':

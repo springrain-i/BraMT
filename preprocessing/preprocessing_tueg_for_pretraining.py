@@ -91,12 +91,12 @@ def preprocessing_recording(file_path, file_key_list: list, db: lmdb.open):
 
 if __name__ == '__main__':
     setup_seed(1)
-    file_path_list = iter_files('path...')
+    file_path_list = iter_files('../Raw_data/TUEG')
 
     file_path_list = sorted(file_path_list)
     random.shuffle(file_path_list)
     # print(file_path_list)
-    db = lmdb.open(r'path...', map_size=1649267441664)
+    db = lmdb.open(r'../../data_for_pretrain/TUEG.lmdb', map_size=1649267441664)
     file_key_list = []
     for file_path in tqdm(file_path_list):
         preprocessing_recording(file_path, file_key_list, db)

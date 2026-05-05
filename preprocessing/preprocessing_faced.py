@@ -7,7 +7,7 @@ import numpy as np
 import glob
 
 labels = np.array([0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8])
-root_dir = '../Raw_data/FACED'
+root_dir = '../../Raw_data/FACED'
 files = [file for file in os.listdir(root_dir)]
 files = sorted(files)
 
@@ -22,8 +22,8 @@ dataset = {
     'val': list(),
     'test': list(),
 }
-os.makedirs('../data/Faced/processed', exist_ok=True)
-db = lmdb.open('../data/Faced/processed', map_size=6612500172)
+os.makedirs('../../processed_data/Faced/processed', exist_ok=True)
+db = lmdb.open('../../processed_data/Faced/processed', map_size=6612500172)
 
 for files_key in files_dict.keys():
     for file in files_dict[files_key]:

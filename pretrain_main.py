@@ -3,11 +3,32 @@ import random
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
-
+import torch_npu
+from torch_npu.contrib import transfer_to_npu
 from datasets.pretraining_dataset import PretrainingDataset
 from models.BraMT import BraMT
 from pretrain_trainer import Trainer
 
+# ========== 只屏蔽 1.26.4 打印，不影响任何输出 ==========
+import sys
+import threading
+
+class FilteredStream:
+    def __init__(self, original_stream):
+        self.original_stream = original_stream
+
+    def write(self, msg):
+        # 只屏蔽包含 1.26.4 的行
+        if "1.26.4" in msg:
+            return
+        self.original_stream.write(msg)
+
+    def flush(self):
+        self.original_stream.flush()
+
+# 立刻启动过滤
+
+# ========================================================
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -109,4 +130,6 @@ def main():
 
 
 if __name__ == '__main__':
+    sys.stdout = FilteredStream(sys.stdout)
+    sys.stderr = FilteredStream(sys.stderr)
     main()

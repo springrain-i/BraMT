@@ -8,16 +8,20 @@ import numpy as np
 import pandas as pd
 
 
-train_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Training set'
-val_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Validation set'
-test_dir = '/data/datasets/BigDownstream/Imagined speech/mat/Test set'
+train_dir = '../Raw_data/BCIC2020/Training set'
+val_dir = '../Raw_data/BCIC2020/Validation set'
+test_dir = '../Raw_data/BCIC2020/Test set'
 
 
 
 files_dict = {
-    'train':sorted([file for file in os.listdir(train_dir)]),
-    'val':sorted([file for file in os.listdir(val_dir)]),
-    'test':sorted([file for file in os.listdir(test_dir)]),
+    # 训练集/验证集：仅保留 .mat 文件，排除文件夹
+    'train': sorted([f for f in os.listdir(train_dir) 
+                    if os.path.isfile(os.path.join(train_dir, f)) and f.endswith('.mat')]),
+    'val': sorted([f for f in os.listdir(val_dir) 
+                  if os.path.isfile(os.path.join(val_dir, f)) and f.endswith('.mat')]),
+    'test': sorted([f for f in os.listdir(test_dir) 
+                   if os.path.isfile(os.path.join(test_dir, f)) and f.endswith('.mat')]),
 }
 
 print(files_dict)
@@ -27,8 +31,8 @@ dataset = {
     'val': list(),
     'test': list(),
 }
-
-db = lmdb.open('/data/datasets/BigDownstream/Imagined speech/processed', map_size=3000000000)
+os.makedirs('../../processed_data/Imagined speech/processed', exist_ok=True)
+db = lmdb.open('../../processed_data/Imagined speech/processed', map_size=3000000000)
 
 for file in files_dict['train']:
     data = scipy.io.loadmat(os.path.join(train_dir, file))
@@ -71,13 +75,14 @@ for file in files_dict['val']:
         dataset['val'].append(sample_key)
 
 
-df = pd.read_excel("/data/datasets/BigDownstream/Imagined speech/mat/Track3_Answer Sheet_Test.xlsx")
+df = pd.read_excel("../Raw_data/BCIC2020/Track3_Answer Sheet_Test.xlsx")
 df_=df.head(53)
 all_labels=df_.values
 print(all_labels.shape)
 all_labels = all_labels[2:, 1:][:, 1:30:2].transpose(1, 0)
 print(all_labels.shape)
 print(all_labels)
+
 
 for j, file in enumerate(files_dict['test']):
     data = h5py.File(os.path.join(test_dir, file))

@@ -3,7 +3,8 @@ import random
 
 import numpy as np
 import torch
-
+import torch_npu
+from torch_npu.contrib import transfer_to_npu
 from datasets import faced_dataset, seedv_dataset, physio_dataset, shu_dataset, isruc_dataset, chb_dataset, \
     speech_dataset, mumtaz_dataset, seedvig_dataset, stress_dataset, tuev_dataset, tuab_dataset, bciciv2a_dataset
 from finetune_trainer import Trainer
