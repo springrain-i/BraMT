@@ -1,7 +1,12 @@
-# BraMT
+<div align="center">
 
-BraMT 是一个 EEG 基座模型，全称为 **Brain Mamba & Transformer**。
-它面向 EEG 预训练与下游解码任务，将 Mamba 的长序列建模能力与 Transformer 的全局交互能力结合起来。
+# 🧠 BraMT
+
+**Brain Mamba & Transformer**
+
+</div>
+
+BraMT 是一个 EEG 基座模型，面向 EEG 预训练与下游解码任务。通过融合 Mamba 的长序列建模能力和 Transformer 的全局交互能力，结合创新的 Criss-Cross Sequence 设计，实现更高效的 EEG 基座模型。
 
 本仓库目前维护两个分支：
 
@@ -10,11 +15,14 @@ BraMT 是一个 EEG 基座模型，全称为 **Brain Mamba & Transformer**。
 
 ## 🎓 项目背景
 
-本项目基于 **CBraMod** 框架开发，是浙江大学本科生科研训练（SRTP）项目。
-我们在 CBraMod 的 Criss-Cross Transformer 架构基础上，引入 Mamba 长序列建模能力，
-提出混合 Mamba-Transformer 架构用于 EEG 基座模型的预训练与下游任务微调。
+本项目属于浙江大学本科生科研训练（SRTP）项目，基于 [CBraMod](https://github.com/wjq-learning/CBraMod) 框架开发。
 
-**致谢**：感谢 CBraMod 开源项目提供的宝贵参考与启发。
+我们在 CBraMod 的 Criss-Cross Transformer 架构基础上进行创新：
+- **引入 Mamba 长序列建模能力**：利用选择性扫描机制处理超长 EEG 序列
+- **Criss-Cross Sequence 设计**：针对 EEG 信号的多维特性（时间-通道-频率），提出交错序列处理方案，分别沿时间和通道维度进行 Mamba 处理，再通过全局融合门实现多尺度特征交互
+- **混合 Mamba-Transformer 架构**：结合局部 Mamba 的高效性和全局 Attention 的表达力，为 EEG 基座模型的预训练与下游任务微调提供统一框架
+
+**致谢**：感谢 [CBraMod](https://github.com/wjq-learning/CBraMod) 开源项目提供的宝贵参考与启发。
 
 ## 🔍 关于项目
 
@@ -329,25 +337,7 @@ BraMT/
 └── README.md
 ```
 
-## 🔗 Checkpoint 与发布计划
+## � 分支说明
 
-为了便于公开分享，建议按以下方式管理大文件：
-
-- **预训练 checkpoint**：上传到 HuggingFace。
-- **代码仓库**：只保留下载链接、使用说明和实验描述。
-- **GPU / NPU 版本**：通过分支区分代码快照，避免混用运行路径和配置。
-
-如果你正在整理对外发布版本，建议明确保留以下内容：
-
-1. 预训练权重下载地址。
-2. 预训练和微调的运行方式。
-3. 各数据集的预处理脚本和输入形状。
-4. 实验表格和分析结果。
-
-## 📝 说明
-
-- `main` 是 GPU 版本。
-- `npu` 是华为云 NPU 版本。
-- HuggingFace 的 checkpoint 链接会在上传后补充。
-
-如果你愿意，我下一步可以继续把这份 README 调整得更像 CBraMod 首页风格，比如加一个简短的项目横幅、徽章和更紧凑的 Quick Start 区块。
+- **`main`**：GPU 版本，作为默认开发与分享分支
+- **`npu`**：华为云 NPU 可运行快照，支持 NPU 环境部署
