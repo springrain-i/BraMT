@@ -192,12 +192,6 @@ class Trainer(object):
                     except Exception:
                         pass
 
-        # at end of training, optionally log final model path
-
-            final_model_path = os.path.join(self.params.model_dir, f'final_pretrained_epoch{self.params.epochs}_loss{best_loss:.6f}.pth')
-            torch.save(self.model.state_dict(), final_model_path)
-            self.logger.train_logger.info(f"Final pretrain model saved to {final_model_path}")
-
         # finish wandb run at the end of training
         if self.wandb_enabled:
             try:

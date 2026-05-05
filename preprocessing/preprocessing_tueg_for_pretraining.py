@@ -105,3 +105,6 @@ if __name__ == '__main__':
     txn.put(key='__keys__'.encode(), value=pickle.dumps(file_key_list))
     txn.commit()
     db.close()
+
+    root = "../Raw_data/TUEG"  # Input EEG directory
+    db_path = "../../data_for_pretrain/TUEG.lmdb"  # Destination LMDB

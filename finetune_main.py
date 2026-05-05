@@ -73,6 +73,13 @@ def main():
                         default='pretrained_weights/pretrained_weights.pth',
                         help='foundation_dir')
 
+    # wandb logging settings
+    parser.add_argument('--use_wandb', type=bool, default=True, help='enable Weights & Biases logging')
+    parser.add_argument('--wandb_project', type=str, default='eeg-pretrain', help='wandb project name')
+    parser.add_argument('--wandb_entity', type=str, default=None, help='wandb entity/org (optional)')
+    parser.add_argument('--wandb_mode', type=str, default='offline', help='wandb mode: online/offline/disabled')
+    parser.add_argument('--wandb_dir', type=str, default='./wandb', help='local dir to store wandb files')
+    parser.add_argument('--wandb_api_key', type=str, default="800a257e9949b9633a2fd6bfda872cb92089b27c", help='wandb API key (optional, for programmatic login)')
 
     """############ Hybrid model settings ############"""
     parser.add_argument('--stage_types', type=str, default='mamba,attn', help='stage_types')
