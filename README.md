@@ -122,7 +122,7 @@ pretrained_weights/pretrained_weights.pth
 
 下游脚本可通过 `--foundation_dir` 加载该文件。
 
-> HuggingFace 链接：待上传后补充
+> **HuggingFace 仓库**：[SpringRainawa/BraMT](https://huggingface.co/SpringRainawa/BraMT)
 
 ## ⛵ 下游微调
 
